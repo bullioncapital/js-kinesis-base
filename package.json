@@ -1,5 +1,5 @@
 {
-  "name": "stellar-base",
+  "name": "@abx/js-kinesis-base",
   "version": "6.0.6",
   "description": "Low level stellar support library",
   "main": "./lib/index.js",
@@ -37,7 +37,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/stellar/js-stellar-base.git"
+    "url": "https://github.com/bullioncapital/js-kinesis-base.git"
   },
   "keywords": [
     "stellar"
@@ -45,9 +45,9 @@
   "author": "Scott Fleckenstein <scott@stellar.org>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/stellar/js-stellar-base/issues"
+    "url": "https://github.com/bullioncapital/js-kinesis-base/issues"
   },
-  "homepage": "https://github.com/stellar/js-stellar-base",
+  "homepage": "https://github.com/bullioncapital/js-kinesis-base",
   "devDependencies": {
     "@kollavarsham/gulp-coveralls": "0.2.8",
     "@types/node": "^11.13.0",
