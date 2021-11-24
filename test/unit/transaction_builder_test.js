@@ -33,6 +33,7 @@ describe('TransactionBuilder', function() {
         .addMemo(memo)
         .setTimeout(StellarBase.TimeoutInfinite)
         .build();
+        // console.log(`transactionHash: ${transaction.toXDR()}`);
     });
 
     it('should have the same source account', function(done) {
@@ -630,7 +631,7 @@ describe('TransactionBuilder', function() {
   describe('.fromXDR', function() {
     it('builds a fee bump transaction', function() {
       const xdr =
-        'AAAABQAAAADgSJG2GOUMy/H9lHyjYZOwyuyytH8y0wWaoc596L+bEgAAAAAAAADIAAAAAgAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1gAAAGQAAAAAAAAACAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA9IYXBweSBiaXJ0aGRheSEAAAAAAQAAAAAAAAABAAAAAOBIkbYY5QzL8f2UfKNhk7DK7LK0fzLTBZqhzn3ov5sSAAAAAAAAAASoF8gAAAAAAAAAAAERuUbWAAAAQK933Dnt1pxXlsf1B5CYn81PLxeYsx+MiV9EGbMdUfEcdDWUySyIkdzJefjpR5ejdXVp/KXosGmNUQ+DrIBlzg0AAAAAAAAAAei/mxIAAABAijIIQpL6KlFefiL4FP8UWQktWEz4wFgGNSaXe7mZdVMuiREntehi1b7MRqZ1h+W+Y0y+Z2HtMunsilT2yS5mAA==';
+        'AAAABQAAAADgSJG2GOUMy/H9lHyjYZOwyuyytH8y0wWaoc596L+bEgAAAAAAAADIAAAAAgAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1gAAAAAAAABkAAAAAAAAAAgAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAPSGFwcHkgYmlydGhkYXkhAAAAAAEAAAAAAAAAAQAAAADgSJG2GOUMy/H9lHyjYZOwyuyytH8y0wWaoc596L+bEgAAAAAAAAAEqBfIAAAAAAAAAAABEblG1gAAAECu6ENUJQ06njC7mcN78Y3CJvJfFEg07EpVVVDP+gm3FO4ijzrAaGXR6otHdCnpQpcC/LieBH1tgViW9lBsCP4JAAAAAAAAAAHov5sSAAAAQFbk0woeHJGOJa2ZpVoIOQoEAPVcDZ7ycTantXxqNkPqRP99hnCXyWN8bQY/bnfmIYspvO3vyqsIXUe0Ee/09Qg=';
       let tx = StellarBase.TransactionBuilder.fromXDR(
         xdr,
         StellarBase.Networks.TESTNET
@@ -647,7 +648,7 @@ describe('TransactionBuilder', function() {
     });
     it('builds a transaction', function() {
       const xdr =
-        'AAAAAAW8Dk9idFR5Le+xi0/h/tU47bgC1YWjtPH1vIVO3BklAAAAZACoKlYAAAABAAAAAAAAAAEAAAALdmlhIGtleWJhc2UAAAAAAQAAAAAAAAAIAAAAAN7aGcXNPO36J1I8MR8S4QFhO79T5JGG2ZeS5Ka1m4mJAAAAAAAAAAFO3BklAAAAQP0ccCoeHdm3S7bOhMjXRMn3EbmETJ9glxpKUZjPSPIxpqZ7EkyTgl3FruieqpZd9LYOzdJrNik1GNBLhgTh/AU=';
+        'AAAAAgAAAQAAAAAAAAAAAj8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAAAAAGQAAAAAAAAE0wAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAQAAABZUZXN0aW5nIG11eGVkIGFjY291bnRzAAAAAAABAAAAAQAAAQAAAAAAAAAAAj8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAQAAAQAAAAAAAAAAAT8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAAAAAAJUC+QAAAAAAAAAAAFW/AX3AAAAQMLrFvPxymi6sReCy8JqMWnh9QH3kNtGyA2rpPA1u0+6EbriBLFNfavPs0AfPHcjnDMw815BM/+q0Co4VBWSygk=';
       let tx = StellarBase.TransactionBuilder.fromXDR(
         xdr,
         StellarBase.Networks.TESTNET
@@ -752,10 +753,34 @@ describe('TransactionBuilder', function() {
     });
 
     it('does not regress js-stellar-sdk#646', function() {
+      // arrange
+      const secretKey = 'SDUYQO2PCSM7WUCX7SAFQOYGNGLNISPMILCHXQVPXVDFYYZ7LYTBPRXD';
+      const account = StellarBase.Keypair.fromSecret(secretKey);
+      const sourceAccount = new StellarBase.Account(
+        account.publicKey(),
+        '0'
+      );
+      const tx = new StellarBase.TransactionBuilder(sourceAccount, {
+        fee: 1000,
+        networkPassphrase: StellarBase.Networks.TESTNET
+      })
+        .addOperation(
+          StellarBase.Operation.payment({
+            destination: 'GDJJRRMBK4IWLEPJGIE6SXD2LP7REGZODU7WDC3I2D6MR37F4XSHBKX2',
+            asset: StellarBase.Asset.native(),
+            amount: '100'
+          })
+        )
+        .setTimeout(StellarBase.TimeoutInfinite)
+        .build();
+        tx.sign(account);
+      const xdrInput = tx.toXDR();
+
+      // ref. https://github.com/stellar/js-stellar-sdk/issues/645
       expect(() => {
         StellarBase.TransactionBuilder.fromXDR(
-          'AAAAAgAAAABg/GhKJU5ut52ih6Klx0ymGvsac1FPJig1CHYqyesIHQAAJxACBmMCAAAADgAAAAAAAAABAAAAATMAAAAAAAABAAAAAQAAAABg/GhKJU5ut52ih6Klx0ymGvsac1FPJig1CHYqyesIHQAAAAAAAAAAqdkSiA5dzNXstOtkPkHd6dAMPMA+MSXwK8OlrAGCKasAAAAAAcnDgAAAAAAAAAAByesIHQAAAEAuLrTfW6D+HYlUD9y+JolF1qrb40hIRATzsQaQjchKJuhOZJjLO0d7oaTD3JZ4UL4vVKtV7TvV17rQgCQnuz8F',
-          'Public Global Stellar Network ; September 2015'
+          xdrInput,
+          StellarBase.Networks.TESTNET
         );
       }).to.not.throw();
     });

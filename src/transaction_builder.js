@@ -449,7 +449,7 @@ export class TransactionBuilder {
       .mul(this.operations.length)
       .toNumber();
     const attrs = {
-      fee,
+      fee: UnsignedHyper.fromString(fee.toString()),
       seqNum: xdr.SequenceNumber.fromString(sequenceNumber.toString()),
       memo: this.memo ? this.memo.toXDRObject() : null
     };
