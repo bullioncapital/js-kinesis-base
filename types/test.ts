@@ -1,4 +1,4 @@
-import * as StellarSdk from 'stellar-base';
+import * as StellarSdk from 'js-kinesis-base';
 
 const masterKey = StellarSdk.Keypair.master(StellarSdk.Networks.TESTNET); // $ExpectType Keypair
 const sourceKey = StellarSdk.Keypair.random(); // $ExpectType Keypair
