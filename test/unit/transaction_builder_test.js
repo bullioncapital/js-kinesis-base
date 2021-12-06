@@ -2,6 +2,74 @@ import { isValidDate } from '../../src/transaction_builder.js';
 import { encodeMuxedAccountToAddress } from '../../src/util/decode_encode_muxed_account.js';
 
 describe('TransactionBuilder', function() {
+  describe('constructs v0 transaction', function() {
+    var source;
+    var destination;
+    var amount;
+    var asset;
+    var transaction;
+    var memo;
+    beforeEach(function() {
+      source = new StellarBase.Account(
+        'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
+        '0'
+      );
+      destination = 'GDJJRRMBK4IWLEPJGIE6SXD2LP7REGZODU7WDC3I2D6MR37F4XSHBKX2';
+      amount = '1000';
+      asset = StellarBase.Asset.native();
+      memo = StellarBase.Memo.id('100');
+
+      transaction = new StellarBase.TransactionBuilder(source, {
+        fee: 100,
+        networkPassphrase: StellarBase.Networks.TESTNET,
+        v1: false
+      })
+        .addOperation(
+          StellarBase.Operation.payment({
+            destination: destination,
+            asset: asset,
+            amount: amount
+          })
+        )
+        .addMemo(memo)
+        .setTimeout(StellarBase.TimeoutInfinite)
+        .build();
+    });
+
+    it('should generate transaction envelop V0', function(done) {
+      expect(transaction.toEnvelope().switch().name).to.be.equal(
+        'envelopeTypeTxV0'
+      );
+      done();
+    });
+
+    it('should have the same source account', function(done) {
+      expect(transaction.source).to.be.equal(source.accountId());
+      done();
+    });
+
+    it('should have the incremented sequence number', function(done) {
+      expect(transaction.sequence).to.be.equal('1');
+      done();
+    });
+
+    it("should increment the account's sequence number", function(done) {
+      expect(source.sequenceNumber()).to.be.equal('1');
+      done();
+    });
+
+    it('should have one payment operation', function(done) {
+      expect(transaction.operations.length).to.be.equal(1);
+      expect(transaction.operations[0].type).to.be.equal('payment');
+      done();
+    });
+
+    it('should have 100 stroops fee', function(done) {
+      expect(transaction.fee).to.be.equal('100');
+      done();
+    });
+  });
+
   describe('constructs a native payment transaction with one operation', function() {
     var source;
     var destination;
