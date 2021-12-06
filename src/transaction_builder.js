@@ -5,6 +5,7 @@ import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
 
 import xdr from './generated/stellar-xdr_generated';
+import { Keypair } from './keypair';
 import { Transaction } from './transaction';
 import { FeeBumpTransaction } from './fee_bump_transaction';
 import { Memo } from './memo';
@@ -117,6 +118,7 @@ export class TransactionBuilder {
     this.memo = opts.memo || Memo.none();
     this.networkPassphrase = opts.networkPassphrase || null;
     this.supportMuxedAccounts = opts.withMuxing || false;
+    this.v1 = opts.v1 === undefined ? true : opts.v1;
   }
 
   /**
@@ -214,10 +216,48 @@ export class TransactionBuilder {
    * @returns {Transaction} This method will return the built {@link Transaction}.
    */
   build() {
+    return this.v1 ? this._buildV1Tx() : this._buildV0Tx();
+  }
+
+  _buildV0Tx() {
     const sequenceNumber = new BigNumber(this.source.sequenceNumber()).add(1);
-    const fee = new BigNumber(this.baseFee)
-      .mul(this.operations.length)
-      .toNumber();
+    const fee = new BigNumber(this.baseFee).toNumber();
+    const attrs = {
+      sourceAccountEd25519: Keypair.fromPublicKey(this.source.accountId())
+        .xdrAccountId()
+        .value(),
+      fee: UnsignedHyper.fromString(fee.toString()),
+      seqNum: xdr.SequenceNumber.fromString(sequenceNumber.toString()),
+      memo: this.memo ? this.memo.toXDRObject() : null,
+      ext: new xdr.TransactionV0Ext(0)
+    };
+
+    if (this.timebounds) {
+      this.timebounds.minTime = UnsignedHyper.fromString(
+        this.timebounds.minTime.toString()
+      );
+      this.timebounds.maxTime = UnsignedHyper.fromString(
+        this.timebounds.maxTime.toString()
+      );
+      attrs.timeBounds = new xdr.TimeBounds(this.timebounds);
+    }
+
+    const xtx = new xdr.Transaction(attrs);
+    xtx.operations(this.operations);
+
+    const xenv = new xdr.envelopeTypeTxV0(
+      new xdr.TransactionV0Envelope({ tx: xtx })
+    );
+    const tx = new Transaction(xenv);
+
+    this.source.incrementSequenceNumber();
+
+    return tx;
+  }
+
+  _buildV1Tx() {
+    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).add(1);
+    const fee = new BigNumber(this.baseFee).toNumber();
     const attrs = {
       fee: UnsignedHyper.fromString(fee.toString()),
       seqNum: xdr.SequenceNumber.fromString(sequenceNumber.toString()),
@@ -358,7 +398,7 @@ export class TransactionBuilder {
 
     const tx = new xdr.FeeBumpTransaction({
       feeSource: feeSourceAccount,
-      fee: xdr.Int64.fromString(base.mul(innerOps + 1).toString()),
+      fee: xdr.Int64.fromString(base.toString()),
       innerTx: xdr.FeeBumpTransactionInnerTx.envelopeTypeTx(
         innerTxEnvelope.v1()
       ),
