@@ -476,7 +476,7 @@ export class TransactionBuilder {
     const xenv = new xdr.envelopeTypeTxV0(
       new xdr.TransactionV0Envelope({ tx: xtx })
     );
-    const tx = new Transaction(xenv);
+    const tx = new Transaction(xenv, this.networkPassphrase);
 
     this.source.incrementSequenceNumber();
 
