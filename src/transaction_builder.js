@@ -133,6 +133,7 @@ export class TransactionBuilder {
     this.extraSigners = clone(opts.extraSigners) || null;
     this.memo = opts.memo || Memo.none();
     this.networkPassphrase = opts.networkPassphrase || null;
+    this.v1 = opts.v1 === undefined ? true : opts.v1;
   }
 
   /**
