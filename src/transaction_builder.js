@@ -113,6 +113,8 @@ export class TransactionBuilder {
     this.timebounds = clone(opts.timebounds) || null;
     this.memo = opts.memo || Memo.none();
     this.networkPassphrase = opts.networkPassphrase || null;
+    this.supportMuxedAccounts = opts.withMuxing || false;
+    this.v1 = opts.v1 === undefined ? true : opts.v1;
   }
 
   /**
