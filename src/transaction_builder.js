@@ -6,6 +6,7 @@ import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
 
 import xdr from './xdr';
+import { Keypair } from './keypair';
 import { Transaction } from './transaction';
 import { FeeBumpTransaction } from './fee_bump_transaction';
 import { SignerKey } from './signerkey';
