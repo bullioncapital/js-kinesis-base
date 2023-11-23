@@ -1,46 +1,4 @@
-// Automatically generated on 2022-08-12T12:40:00+01:00
-import { Operation } from './index';
-
-export {};
-
-// Hidden namespace as hack to work around name collision.
-declare namespace xdrHidden {
-  // tslint:disable-line:strict-export-declare-modifiers
-  class Operation2<T extends Operation = Operation> {
-    constructor(attributes: {
-      sourceAccount: null | xdr.MuxedAccount;
-      body: xdr.OperationBody;
-    });
-
-    sourceAccount(value?: null | xdr.MuxedAccount): null | xdr.MuxedAccount;
-
-    body(value?: xdr.OperationBody): xdr.OperationBody;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): xdr.Operation;
-
-    static write(value: xdr.Operation, io: Buffer): void;
-
-    static isValid(value: xdr.Operation): boolean;
-
-    static toXDR(value: xdr.Operation): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): xdr.Operation;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): xdr.Operation;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-}
-
-export namespace xdr {
-  export import Operation = xdrHidden.Operation2; // tslint:disable-line:strict-export-declare-modifiers
-
+declare namespace xdr {
   interface SignedInt {
     readonly MAX_VALUE: 2147483647;
     readonly MIN_VALUE: -2147483648;
@@ -85,7 +43,9 @@ export namespace xdr {
 
     unsigned: boolean;
 
-    constructor(low: number, high: number);
+    constructor(
+      values: string | bigint | number | (string | bigint | number)[]
+    );
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -114,6 +74,10 @@ export namespace xdr {
     static fromBytes(low: number, high: number): Hyper;
 
     static isValid(value: Hyper): boolean;
+
+    toBigInt(): bigint;
+
+    toString(): string;
   }
 
   class UnsignedHyper {
@@ -123,7 +87,9 @@ export namespace xdr {
 
     unsigned: boolean;
 
-    constructor(low: number, high: number);
+    constructor(
+      values: string | bigint | number | (string | bigint | number)[]
+    );
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -152,6 +118,10 @@ export namespace xdr {
     static fromBytes(low: number, high: number): UnsignedHyper;
 
     static isValid(value: UnsignedHyper): boolean;
+
+    toBigInt(): bigint;
+
+    toString(): string;
   }
 
   class XDRString {
@@ -303,9 +273,11 @@ export namespace xdr {
       | 'claimableBalance'
       | 'liquidityPool'
       | 'contractData'
-      | 'configSetting';
+      | 'contractCode'
+      | 'configSetting'
+      | 'ttl';
 
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
     static account(): LedgerEntryType;
 
@@ -321,7 +293,11 @@ export namespace xdr {
 
     static contractData(): LedgerEntryType;
 
+    static contractCode(): LedgerEntryType;
+
     static configSetting(): LedgerEntryType;
+
+    static ttl(): LedgerEntryType;
   }
 
   class AccountFlags {
@@ -421,20 +397,14 @@ export namespace xdr {
     static claimableBalanceClawbackEnabledFlag(): ClaimableBalanceFlags;
   }
 
-  class ConfigSettingType {
-    readonly name: 'configSettingTypeUint32';
+  class ContractDataDurability {
+    readonly name: 'temporary' | 'persistent';
 
-    readonly value: 0;
+    readonly value: 0 | 1;
 
-    static configSettingTypeUint32(): ConfigSettingType;
-  }
+    static temporary(): ContractDataDurability;
 
-  class ConfigSettingId {
-    readonly name: 'configSettingContractMaxSize';
-
-    readonly value: 0;
-
-    static configSettingContractMaxSize(): ConfigSettingId;
+    static persistent(): ContractDataDurability;
   }
 
   class EnvelopeType {
@@ -447,8 +417,8 @@ export namespace xdr {
       | 'envelopeTypeTxFeeBump'
       | 'envelopeTypeOpId'
       | 'envelopeTypePoolRevokeOpId'
-      | 'envelopeTypeContractIdFromEd25519'
-      | 'envelopeTypeContractIdFromContract';
+      | 'envelopeTypeContractId'
+      | 'envelopeTypeSorobanAuthorization';
 
     readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
@@ -468,9 +438,9 @@ export namespace xdr {
 
     static envelopeTypePoolRevokeOpId(): EnvelopeType;
 
-    static envelopeTypeContractIdFromEd25519(): EnvelopeType;
+    static envelopeTypeContractId(): EnvelopeType;
 
-    static envelopeTypeContractIdFromContract(): EnvelopeType;
+    static envelopeTypeSorobanAuthorization(): EnvelopeType;
   }
 
   class StellarValueType {
@@ -487,27 +457,15 @@ export namespace xdr {
     readonly name:
       | 'disableLiquidityPoolTradingFlag'
       | 'disableLiquidityPoolDepositFlag'
-      | 'disableLiquidityPoolWithdrawalFlag'
-      | 'disableContractCreate'
-      | 'disableContractUpdate'
-      | 'disableContractRemove'
-      | 'disableContractInvoke';
+      | 'disableLiquidityPoolWithdrawalFlag';
 
-    readonly value: 1 | 2 | 4 | 8 | 16 | 32 | 64;
+    readonly value: 1 | 2 | 4;
 
     static disableLiquidityPoolTradingFlag(): LedgerHeaderFlags;
 
     static disableLiquidityPoolDepositFlag(): LedgerHeaderFlags;
 
     static disableLiquidityPoolWithdrawalFlag(): LedgerHeaderFlags;
-
-    static disableContractCreate(): LedgerHeaderFlags;
-
-    static disableContractUpdate(): LedgerHeaderFlags;
-
-    static disableContractRemove(): LedgerHeaderFlags;
-
-    static disableContractInvoke(): LedgerHeaderFlags;
   }
 
   class LedgerUpgradeType {
@@ -517,9 +475,10 @@ export namespace xdr {
       | 'ledgerUpgradeMaxTxSetSize'
       | 'ledgerUpgradeBaseReserve'
       | 'ledgerUpgradeFlags'
-      | 'ledgerUpgradeConfig';
+      | 'ledgerUpgradeConfig'
+      | 'ledgerUpgradeMaxSorobanTxSetSize';
 
-    readonly value: 1 | 2 | 3 | 4 | 5 | 6;
+    readonly value: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
     static ledgerUpgradeVersion(): LedgerUpgradeType;
 
@@ -532,6 +491,8 @@ export namespace xdr {
     static ledgerUpgradeFlags(): LedgerUpgradeType;
 
     static ledgerUpgradeConfig(): LedgerUpgradeType;
+
+    static ledgerUpgradeMaxSorobanTxSetSize(): LedgerUpgradeType;
   }
 
   class BucketEntryType {
@@ -572,6 +533,18 @@ export namespace xdr {
     static ledgerEntryRemoved(): LedgerEntryChangeType;
 
     static ledgerEntryState(): LedgerEntryChangeType;
+  }
+
+  class ContractEventType {
+    readonly name: 'system' | 'contract' | 'diagnostic';
+
+    readonly value: 0 | 1 | 2;
+
+    static system(): ContractEventType;
+
+    static contract(): ContractEventType;
+
+    static diagnostic(): ContractEventType;
   }
 
   class ErrorCode {
@@ -618,7 +591,10 @@ export namespace xdr {
       | 'hello'
       | 'surveyRequest'
       | 'surveyResponse'
-      | 'sendMore';
+      | 'sendMore'
+      | 'sendMoreExtended'
+      | 'floodAdvert'
+      | 'floodDemand';
 
     readonly value:
       | 0
@@ -637,7 +613,10 @@ export namespace xdr {
       | 13
       | 14
       | 15
-      | 16;
+      | 16
+      | 20
+      | 18
+      | 19;
 
     static errorMsg(): MessageType;
 
@@ -672,6 +651,12 @@ export namespace xdr {
     static surveyResponse(): MessageType;
 
     static sendMore(): MessageType;
+
+    static sendMoreExtended(): MessageType;
+
+    static floodAdvert(): MessageType;
+
+    static floodDemand(): MessageType;
   }
 
   class SurveyMessageCommandType {
@@ -680,6 +665,16 @@ export namespace xdr {
     readonly value: 0;
 
     static surveyTopology(): SurveyMessageCommandType;
+  }
+
+  class SurveyMessageResponseType {
+    readonly name: 'surveyTopologyResponseV0' | 'surveyTopologyResponseV1';
+
+    readonly value: 0 | 1;
+
+    static surveyTopologyResponseV0(): SurveyMessageResponseType;
+
+    static surveyTopologyResponseV1(): SurveyMessageResponseType;
   }
 
   class OperationType {
@@ -708,7 +703,9 @@ export namespace xdr {
       | 'setTrustLineFlags'
       | 'liquidityPoolDeposit'
       | 'liquidityPoolWithdraw'
-      | 'invokeHostFunction';
+      | 'invokeHostFunction'
+      | 'extendFootprintTtl'
+      | 'restoreFootprint';
 
     readonly value:
       | 0
@@ -735,7 +732,9 @@ export namespace xdr {
       | 21
       | 22
       | 23
-      | 24;
+      | 24
+      | 25
+      | 26;
 
     static createAccount(): OperationType;
 
@@ -786,6 +785,10 @@ export namespace xdr {
     static liquidityPoolWithdraw(): OperationType;
 
     static invokeHostFunction(): OperationType;
+
+    static extendFootprintTtl(): OperationType;
+
+    static restoreFootprint(): OperationType;
   }
 
   class RevokeSponsorshipType {
@@ -798,14 +801,55 @@ export namespace xdr {
     static revokeSponsorshipSigner(): RevokeSponsorshipType;
   }
 
-  class HostFunction {
-    readonly name: 'hostFnCall' | 'hostFnCreateContract';
+  class HostFunctionType {
+    readonly name:
+      | 'hostFunctionTypeInvokeContract'
+      | 'hostFunctionTypeCreateContract'
+      | 'hostFunctionTypeUploadContractWasm';
+
+    readonly value: 0 | 1 | 2;
+
+    static hostFunctionTypeInvokeContract(): HostFunctionType;
+
+    static hostFunctionTypeCreateContract(): HostFunctionType;
+
+    static hostFunctionTypeUploadContractWasm(): HostFunctionType;
+  }
+
+  class ContractIdPreimageType {
+    readonly name:
+      | 'contractIdPreimageFromAddress'
+      | 'contractIdPreimageFromAsset';
 
     readonly value: 0 | 1;
 
-    static hostFnCall(): HostFunction;
+    static contractIdPreimageFromAddress(): ContractIdPreimageType;
 
-    static hostFnCreateContract(): HostFunction;
+    static contractIdPreimageFromAsset(): ContractIdPreimageType;
+  }
+
+  class SorobanAuthorizedFunctionType {
+    readonly name:
+      | 'sorobanAuthorizedFunctionTypeContractFn'
+      | 'sorobanAuthorizedFunctionTypeCreateContractHostFn';
+
+    readonly value: 0 | 1;
+
+    static sorobanAuthorizedFunctionTypeContractFn(): SorobanAuthorizedFunctionType;
+
+    static sorobanAuthorizedFunctionTypeCreateContractHostFn(): SorobanAuthorizedFunctionType;
+  }
+
+  class SorobanCredentialsType {
+    readonly name:
+      | 'sorobanCredentialsSourceAccount'
+      | 'sorobanCredentialsAddress';
+
+    readonly value: 0 | 1;
+
+    static sorobanCredentialsSourceAccount(): SorobanCredentialsType;
+
+    static sorobanCredentialsAddress(): SorobanCredentialsType;
   }
 
   class MemoType {
@@ -1553,15 +1597,60 @@ export namespace xdr {
     readonly name:
       | 'invokeHostFunctionSuccess'
       | 'invokeHostFunctionMalformed'
-      | 'invokeHostFunctionTrapped';
+      | 'invokeHostFunctionTrapped'
+      | 'invokeHostFunctionResourceLimitExceeded'
+      | 'invokeHostFunctionEntryArchived'
+      | 'invokeHostFunctionInsufficientRefundableFee';
 
-    readonly value: 0 | -1 | -2;
+    readonly value: 0 | -1 | -2 | -3 | -4 | -5;
 
     static invokeHostFunctionSuccess(): InvokeHostFunctionResultCode;
 
     static invokeHostFunctionMalformed(): InvokeHostFunctionResultCode;
 
     static invokeHostFunctionTrapped(): InvokeHostFunctionResultCode;
+
+    static invokeHostFunctionResourceLimitExceeded(): InvokeHostFunctionResultCode;
+
+    static invokeHostFunctionEntryArchived(): InvokeHostFunctionResultCode;
+
+    static invokeHostFunctionInsufficientRefundableFee(): InvokeHostFunctionResultCode;
+  }
+
+  class ExtendFootprintTtlResultCode {
+    readonly name:
+      | 'extendFootprintTtlSuccess'
+      | 'extendFootprintTtlMalformed'
+      | 'extendFootprintTtlResourceLimitExceeded'
+      | 'extendFootprintTtlInsufficientRefundableFee';
+
+    readonly value: 0 | -1 | -2 | -3;
+
+    static extendFootprintTtlSuccess(): ExtendFootprintTtlResultCode;
+
+    static extendFootprintTtlMalformed(): ExtendFootprintTtlResultCode;
+
+    static extendFootprintTtlResourceLimitExceeded(): ExtendFootprintTtlResultCode;
+
+    static extendFootprintTtlInsufficientRefundableFee(): ExtendFootprintTtlResultCode;
+  }
+
+  class RestoreFootprintResultCode {
+    readonly name:
+      | 'restoreFootprintSuccess'
+      | 'restoreFootprintMalformed'
+      | 'restoreFootprintResourceLimitExceeded'
+      | 'restoreFootprintInsufficientRefundableFee';
+
+    readonly value: 0 | -1 | -2 | -3;
+
+    static restoreFootprintSuccess(): RestoreFootprintResultCode;
+
+    static restoreFootprintMalformed(): RestoreFootprintResultCode;
+
+    static restoreFootprintResourceLimitExceeded(): RestoreFootprintResultCode;
+
+    static restoreFootprintInsufficientRefundableFee(): RestoreFootprintResultCode;
   }
 
   class OperationResultCode {
@@ -1610,7 +1699,8 @@ export namespace xdr {
       | 'txFeeBumpInnerFailed'
       | 'txBadSponsorship'
       | 'txBadMinSeqAgeOrGap'
-      | 'txMalformed';
+      | 'txMalformed'
+      | 'txSorobanInvalid';
 
     readonly value:
       | 1
@@ -1630,7 +1720,8 @@ export namespace xdr {
       | -13
       | -14
       | -15
-      | -16;
+      | -16
+      | -17;
 
     static txFeeBumpInnerSuccess(): TransactionResultCode;
 
@@ -1667,6 +1758,8 @@ export namespace xdr {
     static txBadMinSeqAgeOrGap(): TransactionResultCode;
 
     static txMalformed(): TransactionResultCode;
+
+    static txSorobanInvalid(): TransactionResultCode;
   }
 
   class CryptoKeyType {
@@ -1718,227 +1811,28 @@ export namespace xdr {
 
   class ScValType {
     readonly name:
-      | 'scvU63'
+      | 'scvBool'
+      | 'scvVoid'
+      | 'scvError'
       | 'scvU32'
       | 'scvI32'
-      | 'scvStatic'
-      | 'scvObject'
+      | 'scvU64'
+      | 'scvI64'
+      | 'scvTimepoint'
+      | 'scvDuration'
+      | 'scvU128'
+      | 'scvI128'
+      | 'scvU256'
+      | 'scvI256'
+      | 'scvBytes'
+      | 'scvString'
       | 'scvSymbol'
-      | 'scvBitset'
-      | 'scvStatus';
-
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-    static scvU63(): ScValType;
-
-    static scvU32(): ScValType;
-
-    static scvI32(): ScValType;
-
-    static scvStatic(): ScValType;
-
-    static scvObject(): ScValType;
-
-    static scvSymbol(): ScValType;
-
-    static scvBitset(): ScValType;
-
-    static scvStatus(): ScValType;
-  }
-
-  class ScStatic {
-    readonly name:
-      | 'scsVoid'
-      | 'scsTrue'
-      | 'scsFalse'
-      | 'scsLedgerKeyContractCode';
-
-    readonly value: 0 | 1 | 2 | 3;
-
-    static scsVoid(): ScStatic;
-
-    static scsTrue(): ScStatic;
-
-    static scsFalse(): ScStatic;
-
-    static scsLedgerKeyContractCode(): ScStatic;
-  }
-
-  class ScStatusType {
-    readonly name:
-      | 'sstOk'
-      | 'sstUnknownError'
-      | 'sstHostValueError'
-      | 'sstHostObjectError'
-      | 'sstHostFunctionError'
-      | 'sstHostStorageError'
-      | 'sstHostContextError'
-      | 'sstVmError';
-
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
-
-    static sstOk(): ScStatusType;
-
-    static sstUnknownError(): ScStatusType;
-
-    static sstHostValueError(): ScStatusType;
-
-    static sstHostObjectError(): ScStatusType;
-
-    static sstHostFunctionError(): ScStatusType;
-
-    static sstHostStorageError(): ScStatusType;
-
-    static sstHostContextError(): ScStatusType;
-
-    static sstVmError(): ScStatusType;
-  }
-
-  class ScHostValErrorCode {
-    readonly name:
-      | 'hostValueUnknownError'
-      | 'hostValueReservedTagValue'
-      | 'hostValueUnexpectedValType'
-      | 'hostValueU63OutOfRange'
-      | 'hostValueU32OutOfRange'
-      | 'hostValueStaticUnknown'
-      | 'hostValueMissingObject'
-      | 'hostValueSymbolTooLong'
-      | 'hostValueSymbolBadChar'
-      | 'hostValueSymbolContainsNonUtf8'
-      | 'hostValueBitsetTooManyBits'
-      | 'hostValueStatusUnknown';
-
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
-
-    static hostValueUnknownError(): ScHostValErrorCode;
-
-    static hostValueReservedTagValue(): ScHostValErrorCode;
-
-    static hostValueUnexpectedValType(): ScHostValErrorCode;
-
-    static hostValueU63OutOfRange(): ScHostValErrorCode;
-
-    static hostValueU32OutOfRange(): ScHostValErrorCode;
-
-    static hostValueStaticUnknown(): ScHostValErrorCode;
-
-    static hostValueMissingObject(): ScHostValErrorCode;
-
-    static hostValueSymbolTooLong(): ScHostValErrorCode;
-
-    static hostValueSymbolBadChar(): ScHostValErrorCode;
-
-    static hostValueSymbolContainsNonUtf8(): ScHostValErrorCode;
-
-    static hostValueBitsetTooManyBits(): ScHostValErrorCode;
-
-    static hostValueStatusUnknown(): ScHostValErrorCode;
-  }
-
-  class ScHostObjErrorCode {
-    readonly name:
-      | 'hostObjectUnknownError'
-      | 'hostObjectUnknownReference'
-      | 'hostObjectUnexpectedType'
-      | 'hostObjectObjectCountExceedsU32Max'
-      | 'hostObjectObjectNotExist'
-      | 'hostObjectVecIndexOutOfBound'
-      | 'hostObjectContractHashWrongLength';
-
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-
-    static hostObjectUnknownError(): ScHostObjErrorCode;
-
-    static hostObjectUnknownReference(): ScHostObjErrorCode;
-
-    static hostObjectUnexpectedType(): ScHostObjErrorCode;
-
-    static hostObjectObjectCountExceedsU32Max(): ScHostObjErrorCode;
-
-    static hostObjectObjectNotExist(): ScHostObjErrorCode;
-
-    static hostObjectVecIndexOutOfBound(): ScHostObjErrorCode;
-
-    static hostObjectContractHashWrongLength(): ScHostObjErrorCode;
-  }
-
-  class ScHostFnErrorCode {
-    readonly name:
-      | 'hostFnUnknownError'
-      | 'hostFnUnexpectedHostFunctionAction'
-      | 'hostFnInputArgsWrongLength'
-      | 'hostFnInputArgsWrongType'
-      | 'hostFnInputArgsInvalid';
-
-    readonly value: 0 | 1 | 2 | 3 | 4;
-
-    static hostFnUnknownError(): ScHostFnErrorCode;
-
-    static hostFnUnexpectedHostFunctionAction(): ScHostFnErrorCode;
-
-    static hostFnInputArgsWrongLength(): ScHostFnErrorCode;
-
-    static hostFnInputArgsWrongType(): ScHostFnErrorCode;
-
-    static hostFnInputArgsInvalid(): ScHostFnErrorCode;
-  }
-
-  class ScHostStorageErrorCode {
-    readonly name:
-      | 'hostStorageUnknownError'
-      | 'hostStorageExpectContractData'
-      | 'hostStorageReadwriteAccessToReadonlyEntry'
-      | 'hostStorageAccessToUnknownEntry'
-      | 'hostStorageMissingKeyInGet'
-      | 'hostStorageGetOnDeletedKey';
-
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5;
-
-    static hostStorageUnknownError(): ScHostStorageErrorCode;
-
-    static hostStorageExpectContractData(): ScHostStorageErrorCode;
-
-    static hostStorageReadwriteAccessToReadonlyEntry(): ScHostStorageErrorCode;
-
-    static hostStorageAccessToUnknownEntry(): ScHostStorageErrorCode;
-
-    static hostStorageMissingKeyInGet(): ScHostStorageErrorCode;
-
-    static hostStorageGetOnDeletedKey(): ScHostStorageErrorCode;
-  }
-
-  class ScHostContextErrorCode {
-    readonly name: 'hostContextUnknownError' | 'hostContextNoContractRunning';
-
-    readonly value: 0 | 1;
-
-    static hostContextUnknownError(): ScHostContextErrorCode;
-
-    static hostContextNoContractRunning(): ScHostContextErrorCode;
-  }
-
-  class ScVmErrorCode {
-    readonly name:
-      | 'vmUnknown'
-      | 'vmValidation'
-      | 'vmInstantiation'
-      | 'vmFunction'
-      | 'vmTable'
-      | 'vmMemory'
-      | 'vmGlobal'
-      | 'vmValue'
-      | 'vmTrapUnreachable'
-      | 'vmTrapMemoryAccessOutOfBounds'
-      | 'vmTrapTableAccessOutOfBounds'
-      | 'vmTrapElemUninitialized'
-      | 'vmTrapDivisionByZero'
-      | 'vmTrapIntegerOverflow'
-      | 'vmTrapInvalidConversionToInt'
-      | 'vmTrapStackOverflow'
-      | 'vmTrapUnexpectedSignature'
-      | 'vmTrapMemLimitExceeded'
-      | 'vmTrapCpuLimitExceeded';
+      | 'scvVec'
+      | 'scvMap'
+      | 'scvAddress'
+      | 'scvContractInstance'
+      | 'scvLedgerKeyContractInstance'
+      | 'scvLedgerKeyNonce';
 
     readonly value:
       | 0
@@ -1959,118 +1853,146 @@ export namespace xdr {
       | 15
       | 16
       | 17
-      | 18;
+      | 18
+      | 19
+      | 20
+      | 21;
 
-    static vmUnknown(): ScVmErrorCode;
+    static scvBool(): ScValType;
 
-    static vmValidation(): ScVmErrorCode;
+    static scvVoid(): ScValType;
 
-    static vmInstantiation(): ScVmErrorCode;
+    static scvError(): ScValType;
 
-    static vmFunction(): ScVmErrorCode;
+    static scvU32(): ScValType;
 
-    static vmTable(): ScVmErrorCode;
+    static scvI32(): ScValType;
 
-    static vmMemory(): ScVmErrorCode;
+    static scvU64(): ScValType;
 
-    static vmGlobal(): ScVmErrorCode;
+    static scvI64(): ScValType;
 
-    static vmValue(): ScVmErrorCode;
+    static scvTimepoint(): ScValType;
 
-    static vmTrapUnreachable(): ScVmErrorCode;
+    static scvDuration(): ScValType;
 
-    static vmTrapMemoryAccessOutOfBounds(): ScVmErrorCode;
+    static scvU128(): ScValType;
 
-    static vmTrapTableAccessOutOfBounds(): ScVmErrorCode;
+    static scvI128(): ScValType;
 
-    static vmTrapElemUninitialized(): ScVmErrorCode;
+    static scvU256(): ScValType;
 
-    static vmTrapDivisionByZero(): ScVmErrorCode;
+    static scvI256(): ScValType;
 
-    static vmTrapIntegerOverflow(): ScVmErrorCode;
+    static scvBytes(): ScValType;
 
-    static vmTrapInvalidConversionToInt(): ScVmErrorCode;
+    static scvString(): ScValType;
 
-    static vmTrapStackOverflow(): ScVmErrorCode;
+    static scvSymbol(): ScValType;
 
-    static vmTrapUnexpectedSignature(): ScVmErrorCode;
+    static scvVec(): ScValType;
 
-    static vmTrapMemLimitExceeded(): ScVmErrorCode;
+    static scvMap(): ScValType;
 
-    static vmTrapCpuLimitExceeded(): ScVmErrorCode;
+    static scvAddress(): ScValType;
+
+    static scvContractInstance(): ScValType;
+
+    static scvLedgerKeyContractInstance(): ScValType;
+
+    static scvLedgerKeyNonce(): ScValType;
   }
 
-  class ScUnknownErrorCode {
-    readonly name: 'unknownErrorGeneral' | 'unknownErrorXdr';
-
-    readonly value: 0 | 1;
-
-    static unknownErrorGeneral(): ScUnknownErrorCode;
-
-    static unknownErrorXdr(): ScUnknownErrorCode;
-  }
-
-  class ScObjectType {
+  class ScErrorType {
     readonly name:
-      | 'scoVec'
-      | 'scoMap'
-      | 'scoU64'
-      | 'scoI64'
-      | 'scoBytes'
-      | 'scoBigInt'
-      | 'scoHash'
-      | 'scoPublicKey'
-      | 'scoContractCode';
+      | 'sceContract'
+      | 'sceWasmVm'
+      | 'sceContext'
+      | 'sceStorage'
+      | 'sceObject'
+      | 'sceCrypto'
+      | 'sceEvents'
+      | 'sceBudget'
+      | 'sceValue'
+      | 'sceAuth';
 
-    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-    static scoVec(): ScObjectType;
+    static sceContract(): ScErrorType;
 
-    static scoMap(): ScObjectType;
+    static sceWasmVm(): ScErrorType;
 
-    static scoU64(): ScObjectType;
+    static sceContext(): ScErrorType;
 
-    static scoI64(): ScObjectType;
+    static sceStorage(): ScErrorType;
 
-    static scoBytes(): ScObjectType;
+    static sceObject(): ScErrorType;
 
-    static scoBigInt(): ScObjectType;
+    static sceCrypto(): ScErrorType;
 
-    static scoHash(): ScObjectType;
+    static sceEvents(): ScErrorType;
 
-    static scoPublicKey(): ScObjectType;
+    static sceBudget(): ScErrorType;
 
-    static scoContractCode(): ScObjectType;
+    static sceValue(): ScErrorType;
+
+    static sceAuth(): ScErrorType;
   }
 
-  class ScNumSign {
-    readonly name: 'negative' | 'zero' | 'positive';
+  class ScErrorCode {
+    readonly name:
+      | 'scecArithDomain'
+      | 'scecIndexBounds'
+      | 'scecInvalidInput'
+      | 'scecMissingValue'
+      | 'scecExistingValue'
+      | 'scecExceededLimit'
+      | 'scecInvalidAction'
+      | 'scecInternalError'
+      | 'scecUnexpectedType'
+      | 'scecUnexpectedSize';
 
-    readonly value: -1 | 0 | 1;
+    readonly value: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-    static negative(): ScNumSign;
+    static scecArithDomain(): ScErrorCode;
 
-    static zero(): ScNumSign;
+    static scecIndexBounds(): ScErrorCode;
 
-    static positive(): ScNumSign;
+    static scecInvalidInput(): ScErrorCode;
+
+    static scecMissingValue(): ScErrorCode;
+
+    static scecExistingValue(): ScErrorCode;
+
+    static scecExceededLimit(): ScErrorCode;
+
+    static scecInvalidAction(): ScErrorCode;
+
+    static scecInternalError(): ScErrorCode;
+
+    static scecUnexpectedType(): ScErrorCode;
+
+    static scecUnexpectedSize(): ScErrorCode;
   }
 
-  class ScHashType {
-    readonly name: 'schashSha256';
-
-    readonly value: 0;
-
-    static schashSha256(): ScHashType;
-  }
-
-  class ScContractCodeType {
-    readonly name: 'sccontractCodeWasm' | 'sccontractCodeToken';
+  class ContractExecutableType {
+    readonly name: 'contractExecutableWasm' | 'contractExecutableStellarAsset';
 
     readonly value: 0 | 1;
 
-    static sccontractCodeWasm(): ScContractCodeType;
+    static contractExecutableWasm(): ContractExecutableType;
 
-    static sccontractCodeToken(): ScContractCodeType;
+    static contractExecutableStellarAsset(): ContractExecutableType;
+  }
+
+  class ScAddressType {
+    readonly name: 'scAddressTypeAccount' | 'scAddressTypeContract';
+
+    readonly value: 0 | 1;
+
+    static scAddressTypeAccount(): ScAddressType;
+
+    static scAddressTypeContract(): ScAddressType;
   }
 
   class ScEnvMetaKind {
@@ -2083,25 +2005,34 @@ export namespace xdr {
 
   class ScSpecType {
     readonly name:
+      | 'scSpecTypeVal'
+      | 'scSpecTypeBool'
+      | 'scSpecTypeVoid'
+      | 'scSpecTypeError'
       | 'scSpecTypeU32'
       | 'scSpecTypeI32'
       | 'scSpecTypeU64'
       | 'scSpecTypeI64'
-      | 'scSpecTypeBool'
-      | 'scSpecTypeSymbol'
-      | 'scSpecTypeBitset'
-      | 'scSpecTypeStatus'
+      | 'scSpecTypeTimepoint'
+      | 'scSpecTypeDuration'
+      | 'scSpecTypeU128'
+      | 'scSpecTypeI128'
+      | 'scSpecTypeU256'
+      | 'scSpecTypeI256'
       | 'scSpecTypeBytes'
-      | 'scSpecTypeBigInt'
+      | 'scSpecTypeString'
+      | 'scSpecTypeSymbol'
+      | 'scSpecTypeAddress'
       | 'scSpecTypeOption'
       | 'scSpecTypeResult'
       | 'scSpecTypeVec'
-      | 'scSpecTypeSet'
       | 'scSpecTypeMap'
       | 'scSpecTypeTuple'
+      | 'scSpecTypeBytesN'
       | 'scSpecTypeUdt';
 
     readonly value:
+      | 0
       | 1
       | 2
       | 3
@@ -2112,13 +2043,28 @@ export namespace xdr {
       | 8
       | 9
       | 10
+      | 11
+      | 12
+      | 13
+      | 14
+      | 16
+      | 17
+      | 19
       | 1000
       | 1001
       | 1002
-      | 1003
       | 1004
       | 1005
+      | 1006
       | 2000;
+
+    static scSpecTypeVal(): ScSpecType;
+
+    static scSpecTypeBool(): ScSpecType;
+
+    static scSpecTypeVoid(): ScSpecType;
+
+    static scSpecTypeError(): ScSpecType;
 
     static scSpecTypeU32(): ScSpecType;
 
@@ -2128,17 +2074,25 @@ export namespace xdr {
 
     static scSpecTypeI64(): ScSpecType;
 
-    static scSpecTypeBool(): ScSpecType;
+    static scSpecTypeTimepoint(): ScSpecType;
 
-    static scSpecTypeSymbol(): ScSpecType;
+    static scSpecTypeDuration(): ScSpecType;
 
-    static scSpecTypeBitset(): ScSpecType;
+    static scSpecTypeU128(): ScSpecType;
 
-    static scSpecTypeStatus(): ScSpecType;
+    static scSpecTypeI128(): ScSpecType;
+
+    static scSpecTypeU256(): ScSpecType;
+
+    static scSpecTypeI256(): ScSpecType;
 
     static scSpecTypeBytes(): ScSpecType;
 
-    static scSpecTypeBigInt(): ScSpecType;
+    static scSpecTypeString(): ScSpecType;
+
+    static scSpecTypeSymbol(): ScSpecType;
+
+    static scSpecTypeAddress(): ScSpecType;
 
     static scSpecTypeOption(): ScSpecType;
 
@@ -2146,33 +2100,47 @@ export namespace xdr {
 
     static scSpecTypeVec(): ScSpecType;
 
-    static scSpecTypeSet(): ScSpecType;
-
     static scSpecTypeMap(): ScSpecType;
 
     static scSpecTypeTuple(): ScSpecType;
 
+    static scSpecTypeBytesN(): ScSpecType;
+
     static scSpecTypeUdt(): ScSpecType;
+  }
+
+  class ScSpecUdtUnionCaseV0Kind {
+    readonly name: 'scSpecUdtUnionCaseVoidV0' | 'scSpecUdtUnionCaseTupleV0';
+
+    readonly value: 0 | 1;
+
+    static scSpecUdtUnionCaseVoidV0(): ScSpecUdtUnionCaseV0Kind;
+
+    static scSpecUdtUnionCaseTupleV0(): ScSpecUdtUnionCaseV0Kind;
   }
 
   class ScSpecEntryKind {
     readonly name:
       | 'scSpecEntryFunctionV0'
       | 'scSpecEntryUdtStructV0'
-      | 'scSpecEntryUdtUnionV0';
+      | 'scSpecEntryUdtUnionV0'
+      | 'scSpecEntryUdtEnumV0'
+      | 'scSpecEntryUdtErrorEnumV0';
 
-    readonly value: 0 | 1 | 2;
+    readonly value: 0 | 1 | 2 | 3 | 4;
 
     static scSpecEntryFunctionV0(): ScSpecEntryKind;
 
     static scSpecEntryUdtStructV0(): ScSpecEntryKind;
 
     static scSpecEntryUdtUnionV0(): ScSpecEntryKind;
+
+    static scSpecEntryUdtEnumV0(): ScSpecEntryKind;
+
+    static scSpecEntryUdtErrorEnumV0(): ScSpecEntryKind;
   }
 
   const Value: VarOpaque;
-
-  type AccountId = PublicKey;
 
   const Thresholds: Opaque;
 
@@ -2182,13 +2150,9 @@ export namespace xdr {
 
   type SequenceNumber = Int64;
 
-  type TimePoint = Uint64;
-
-  type Duration = Uint64;
-
   const DataValue: VarOpaque;
 
-  type PoolId = typeof Hash;
+  type PoolId = Hash;
 
   const AssetCode4: Opaque;
 
@@ -2204,6 +2168,10 @@ export namespace xdr {
 
   const PeerStatList: XDRArray<PeerStats>;
 
+  const TxAdvertVector: XDRArray<Hash>;
+
+  const TxDemandVector: XDRArray<Hash>;
+
   const Hash: Opaque;
 
   const Uint256: Opaque;
@@ -2216,17 +2184,27 @@ export namespace xdr {
 
   class Int64 extends Hyper {}
 
+  type TimePoint = Uint64;
+
+  type Duration = Uint64;
+
   const Signature: VarOpaque;
 
   const SignatureHint: Opaque;
 
   type NodeId = PublicKey;
 
-  const ScSymbol: XDRString;
+  type AccountId = PublicKey;
 
   const ScVec: XDRArray<ScVal>;
 
   const ScMap: XDRArray<ScMapEntry>;
+
+  const ScBytes: VarOpaque;
+
+  const ScString: XDRString;
+
+  const ScSymbol: XDRString;
 
   class ScpBallot {
     constructor(attributes: { counter: number; value: Buffer });
@@ -3246,11 +3224,21 @@ export namespace xdr {
   }
 
   class ContractDataEntry {
-    constructor(attributes: { contractId: Buffer; key: ScVal; val: ScVal });
+    constructor(attributes: {
+      ext: ExtensionPoint;
+      contract: ScAddress;
+      key: ScVal;
+      durability: ContractDataDurability;
+      val: ScVal;
+    });
 
-    contractId(value?: Buffer): Buffer;
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    contract(value?: ScAddress): ScAddress;
 
     key(value?: ScVal): ScVal;
+
+    durability(value?: ContractDataDurability): ContractDataDurability;
 
     val(value?: ScVal): ScVal;
 
@@ -3275,34 +3263,62 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ConfigSettingEntry {
+  class ContractCodeEntry {
     constructor(attributes: {
-      ext: ConfigSettingEntryExt;
-      configSettingId: ConfigSettingId;
-      setting: ConfigSetting;
+      ext: ExtensionPoint;
+      hash: Buffer;
+      code: Buffer;
     });
 
-    ext(value?: ConfigSettingEntryExt): ConfigSettingEntryExt;
+    ext(value?: ExtensionPoint): ExtensionPoint;
 
-    configSettingId(value?: ConfigSettingId): ConfigSettingId;
+    hash(value?: Buffer): Buffer;
 
-    setting(value?: ConfigSetting): ConfigSetting;
+    code(value?: Buffer): Buffer;
 
     toXDR(format?: 'raw'): Buffer;
 
     toXDR(format: 'hex' | 'base64'): string;
 
-    static read(io: Buffer): ConfigSettingEntry;
+    static read(io: Buffer): ContractCodeEntry;
 
-    static write(value: ConfigSettingEntry, io: Buffer): void;
+    static write(value: ContractCodeEntry, io: Buffer): void;
 
-    static isValid(value: ConfigSettingEntry): boolean;
+    static isValid(value: ContractCodeEntry): boolean;
 
-    static toXDR(value: ConfigSettingEntry): Buffer;
+    static toXDR(value: ContractCodeEntry): Buffer;
 
-    static fromXDR(input: Buffer, format?: 'raw'): ConfigSettingEntry;
+    static fromXDR(input: Buffer, format?: 'raw'): ContractCodeEntry;
 
-    static fromXDR(input: string, format: 'hex' | 'base64'): ConfigSettingEntry;
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractCodeEntry;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class TtlEntry {
+    constructor(attributes: { keyHash: Buffer; liveUntilLedgerSeq: number });
+
+    keyHash(value?: Buffer): Buffer;
+
+    liveUntilLedgerSeq(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): TtlEntry;
+
+    static write(value: TtlEntry, io: Buffer): void;
+
+    static isValid(value: TtlEntry): boolean;
+
+    static toXDR(value: TtlEntry): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): TtlEntry;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): TtlEntry;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -3549,11 +3565,17 @@ export namespace xdr {
   }
 
   class LedgerKeyContractData {
-    constructor(attributes: { contractId: Buffer; key: ScVal });
+    constructor(attributes: {
+      contract: ScAddress;
+      key: ScVal;
+      durability: ContractDataDurability;
+    });
 
-    contractId(value?: Buffer): Buffer;
+    contract(value?: ScAddress): ScAddress;
 
     key(value?: ScVal): ScVal;
+
+    durability(value?: ContractDataDurability): ContractDataDurability;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -3573,6 +3595,35 @@ export namespace xdr {
       input: string,
       format: 'hex' | 'base64'
     ): LedgerKeyContractData;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class LedgerKeyContractCode {
+    constructor(attributes: { hash: Buffer });
+
+    hash(value?: Buffer): Buffer;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): LedgerKeyContractCode;
+
+    static write(value: LedgerKeyContractCode, io: Buffer): void;
+
+    static isValid(value: LedgerKeyContractCode): boolean;
+
+    static toXDR(value: LedgerKeyContractCode): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): LedgerKeyContractCode;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): LedgerKeyContractCode;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -3602,6 +3653,32 @@ export namespace xdr {
       input: string,
       format: 'hex' | 'base64'
     ): LedgerKeyConfigSetting;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class LedgerKeyTtl {
+    constructor(attributes: { keyHash: Buffer });
+
+    keyHash(value?: Buffer): Buffer;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): LedgerKeyTtl;
+
+    static write(value: LedgerKeyTtl, io: Buffer): void;
+
+    static isValid(value: LedgerKeyTtl): boolean;
+
+    static toXDR(value: LedgerKeyTtl): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): LedgerKeyTtl;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): LedgerKeyTtl;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -3777,31 +3854,57 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class LedgerUpgradeConfigSetting {
-    constructor(attributes: { id: ConfigSettingId; setting: ConfigSetting });
+  class ConfigUpgradeSetKey {
+    constructor(attributes: { contractId: Buffer; contentHash: Buffer });
 
-    id(value?: ConfigSettingId): ConfigSettingId;
+    contractId(value?: Buffer): Buffer;
 
-    setting(value?: ConfigSetting): ConfigSetting;
+    contentHash(value?: Buffer): Buffer;
 
     toXDR(format?: 'raw'): Buffer;
 
     toXDR(format: 'hex' | 'base64'): string;
 
-    static read(io: Buffer): LedgerUpgradeConfigSetting;
+    static read(io: Buffer): ConfigUpgradeSetKey;
 
-    static write(value: LedgerUpgradeConfigSetting, io: Buffer): void;
+    static write(value: ConfigUpgradeSetKey, io: Buffer): void;
 
-    static isValid(value: LedgerUpgradeConfigSetting): boolean;
+    static isValid(value: ConfigUpgradeSetKey): boolean;
 
-    static toXDR(value: LedgerUpgradeConfigSetting): Buffer;
+    static toXDR(value: ConfigUpgradeSetKey): Buffer;
 
-    static fromXDR(input: Buffer, format?: 'raw'): LedgerUpgradeConfigSetting;
+    static fromXDR(input: Buffer, format?: 'raw'): ConfigUpgradeSetKey;
 
     static fromXDR(
       input: string,
       format: 'hex' | 'base64'
-    ): LedgerUpgradeConfigSetting;
+    ): ConfigUpgradeSetKey;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ConfigUpgradeSet {
+    constructor(attributes: { updatedEntry: ConfigSettingEntry[] });
+
+    updatedEntry(value?: ConfigSettingEntry[]): ConfigSettingEntry[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ConfigUpgradeSet;
+
+    static write(value: ConfigUpgradeSet, io: Buffer): void;
+
+    static isValid(value: ConfigUpgradeSet): boolean;
+
+    static toXDR(value: ConfigUpgradeSet): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ConfigUpgradeSet;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ConfigUpgradeSet;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -4264,6 +4367,218 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
+  class ContractEventV0 {
+    constructor(attributes: { topics: ScVal[]; data: ScVal });
+
+    topics(value?: ScVal[]): ScVal[];
+
+    data(value?: ScVal): ScVal;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractEventV0;
+
+    static write(value: ContractEventV0, io: Buffer): void;
+
+    static isValid(value: ContractEventV0): boolean;
+
+    static toXDR(value: ContractEventV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ContractEventV0;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractEventV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ContractEvent {
+    constructor(attributes: {
+      ext: ExtensionPoint;
+      contractId: null | Buffer;
+      type: ContractEventType;
+      body: ContractEventBody;
+    });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    contractId(value?: null | Buffer): null | Buffer;
+
+    type(value?: ContractEventType): ContractEventType;
+
+    body(value?: ContractEventBody): ContractEventBody;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractEvent;
+
+    static write(value: ContractEvent, io: Buffer): void;
+
+    static isValid(value: ContractEvent): boolean;
+
+    static toXDR(value: ContractEvent): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ContractEvent;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractEvent;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class DiagnosticEvent {
+    constructor(attributes: {
+      inSuccessfulContractCall: boolean;
+      event: ContractEvent;
+    });
+
+    inSuccessfulContractCall(value?: boolean): boolean;
+
+    event(value?: ContractEvent): ContractEvent;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): DiagnosticEvent;
+
+    static write(value: DiagnosticEvent, io: Buffer): void;
+
+    static isValid(value: DiagnosticEvent): boolean;
+
+    static toXDR(value: DiagnosticEvent): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): DiagnosticEvent;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): DiagnosticEvent;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanTransactionMeta {
+    constructor(attributes: {
+      ext: ExtensionPoint;
+      events: ContractEvent[];
+      returnValue: ScVal;
+      diagnosticEvents: DiagnosticEvent[];
+    });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    events(value?: ContractEvent[]): ContractEvent[];
+
+    returnValue(value?: ScVal): ScVal;
+
+    diagnosticEvents(value?: DiagnosticEvent[]): DiagnosticEvent[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanTransactionMeta;
+
+    static write(value: SorobanTransactionMeta, io: Buffer): void;
+
+    static isValid(value: SorobanTransactionMeta): boolean;
+
+    static toXDR(value: SorobanTransactionMeta): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanTransactionMeta;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanTransactionMeta;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class TransactionMetaV3 {
+    constructor(attributes: {
+      ext: ExtensionPoint;
+      txChangesBefore: LedgerEntryChange[];
+      operations: OperationMeta[];
+      txChangesAfter: LedgerEntryChange[];
+      sorobanMeta: null | SorobanTransactionMeta;
+    });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    txChangesBefore(value?: LedgerEntryChange[]): LedgerEntryChange[];
+
+    operations(value?: OperationMeta[]): OperationMeta[];
+
+    txChangesAfter(value?: LedgerEntryChange[]): LedgerEntryChange[];
+
+    sorobanMeta(
+      value?: null | SorobanTransactionMeta
+    ): null | SorobanTransactionMeta;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): TransactionMetaV3;
+
+    static write(value: TransactionMetaV3, io: Buffer): void;
+
+    static isValid(value: TransactionMetaV3): boolean;
+
+    static toXDR(value: TransactionMetaV3): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): TransactionMetaV3;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): TransactionMetaV3;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class InvokeHostFunctionSuccessPreImage {
+    constructor(attributes: { returnValue: ScVal; events: ContractEvent[] });
+
+    returnValue(value?: ScVal): ScVal;
+
+    events(value?: ContractEvent[]): ContractEvent[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): InvokeHostFunctionSuccessPreImage;
+
+    static write(value: InvokeHostFunctionSuccessPreImage, io: Buffer): void;
+
+    static isValid(value: InvokeHostFunctionSuccessPreImage): boolean;
+
+    static toXDR(value: InvokeHostFunctionSuccessPreImage): Buffer;
+
+    static fromXDR(
+      input: Buffer,
+      format?: 'raw'
+    ): InvokeHostFunctionSuccessPreImage;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): InvokeHostFunctionSuccessPreImage;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
   class TransactionResultMeta {
     constructor(attributes: {
       result: TransactionResultPair;
@@ -4374,12 +4689,18 @@ export namespace xdr {
 
   class LedgerCloseMetaV1 {
     constructor(attributes: {
+      ext: ExtensionPoint;
       ledgerHeader: LedgerHeaderHistoryEntry;
       txSet: GeneralizedTransactionSet;
       txProcessing: TransactionResultMeta[];
       upgradesProcessing: UpgradeEntryMeta[];
       scpInfo: ScpHistoryEntry[];
+      totalByteSizeOfBucketList: Uint64;
+      evictedTemporaryLedgerKeys: LedgerKey[];
+      evictedPersistentLedgerEntries: LedgerEntry[];
     });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
 
     ledgerHeader(value?: LedgerHeaderHistoryEntry): LedgerHeaderHistoryEntry;
 
@@ -4390,6 +4711,12 @@ export namespace xdr {
     upgradesProcessing(value?: UpgradeEntryMeta[]): UpgradeEntryMeta[];
 
     scpInfo(value?: ScpHistoryEntry[]): ScpHistoryEntry[];
+
+    totalByteSizeOfBucketList(value?: Uint64): Uint64;
+
+    evictedTemporaryLedgerKeys(value?: LedgerKey[]): LedgerKey[];
+
+    evictedPersistentLedgerEntries(value?: LedgerEntry[]): LedgerEntry[];
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -4460,6 +4787,34 @@ export namespace xdr {
     static fromXDR(input: Buffer, format?: 'raw'): SendMore;
 
     static fromXDR(input: string, format: 'hex' | 'base64'): SendMore;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SendMoreExtended {
+    constructor(attributes: { numMessages: number; numBytes: number });
+
+    numMessages(value?: number): number;
+
+    numBytes(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SendMoreExtended;
+
+    static write(value: SendMoreExtended, io: Buffer): void;
+
+    static isValid(value: SendMoreExtended): boolean;
+
+    static toXDR(value: SendMoreExtended): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SendMoreExtended;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): SendMoreExtended;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -4553,9 +4908,9 @@ export namespace xdr {
   }
 
   class Auth {
-    constructor(attributes: { unused: number });
+    constructor(attributes: { flags: number });
 
-    unused(value?: number): number;
+    flags(value?: number): number;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -4864,7 +5219,7 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class TopologyResponseBody {
+  class TopologyResponseBodyV0 {
     constructor(attributes: {
       inboundPeers: PeerStats[];
       outboundPeers: PeerStats[];
@@ -4884,20 +5239,118 @@ export namespace xdr {
 
     toXDR(format: 'hex' | 'base64'): string;
 
-    static read(io: Buffer): TopologyResponseBody;
+    static read(io: Buffer): TopologyResponseBodyV0;
 
-    static write(value: TopologyResponseBody, io: Buffer): void;
+    static write(value: TopologyResponseBodyV0, io: Buffer): void;
 
-    static isValid(value: TopologyResponseBody): boolean;
+    static isValid(value: TopologyResponseBodyV0): boolean;
 
-    static toXDR(value: TopologyResponseBody): Buffer;
+    static toXDR(value: TopologyResponseBodyV0): Buffer;
 
-    static fromXDR(input: Buffer, format?: 'raw'): TopologyResponseBody;
+    static fromXDR(input: Buffer, format?: 'raw'): TopologyResponseBodyV0;
 
     static fromXDR(
       input: string,
       format: 'hex' | 'base64'
-    ): TopologyResponseBody;
+    ): TopologyResponseBodyV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class TopologyResponseBodyV1 {
+    constructor(attributes: {
+      inboundPeers: PeerStats[];
+      outboundPeers: PeerStats[];
+      totalInboundPeerCount: number;
+      totalOutboundPeerCount: number;
+      maxInboundPeerCount: number;
+      maxOutboundPeerCount: number;
+    });
+
+    inboundPeers(value?: PeerStats[]): PeerStats[];
+
+    outboundPeers(value?: PeerStats[]): PeerStats[];
+
+    totalInboundPeerCount(value?: number): number;
+
+    totalOutboundPeerCount(value?: number): number;
+
+    maxInboundPeerCount(value?: number): number;
+
+    maxOutboundPeerCount(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): TopologyResponseBodyV1;
+
+    static write(value: TopologyResponseBodyV1, io: Buffer): void;
+
+    static isValid(value: TopologyResponseBodyV1): boolean;
+
+    static toXDR(value: TopologyResponseBodyV1): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): TopologyResponseBodyV1;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): TopologyResponseBodyV1;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class FloodAdvert {
+    constructor(attributes: { txHashes: Hash[] });
+
+    txHashes(value?: Hash[]): Hash[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): FloodAdvert;
+
+    static write(value: FloodAdvert, io: Buffer): void;
+
+    static isValid(value: FloodAdvert): boolean;
+
+    static toXDR(value: FloodAdvert): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): FloodAdvert;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): FloodAdvert;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class FloodDemand {
+    constructor(attributes: { txHashes: Hash[] });
+
+    txHashes(value?: Hash[]): Hash[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): FloodDemand;
+
+    static write(value: FloodDemand, io: Buffer): void;
+
+    static isValid(value: FloodDemand): boolean;
+
+    static toXDR(value: FloodDemand): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): FloodDemand;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): FloodDemand;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -4994,34 +5447,6 @@ export namespace xdr {
     static fromXDR(input: Buffer, format?: 'raw'): DecoratedSignature;
 
     static fromXDR(input: string, format: 'hex' | 'base64'): DecoratedSignature;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class LedgerFootprint {
-    constructor(attributes: { readOnly: LedgerKey[]; readWrite: LedgerKey[] });
-
-    readOnly(value?: LedgerKey[]): LedgerKey[];
-
-    readWrite(value?: LedgerKey[]): LedgerKey[];
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): LedgerFootprint;
-
-    static write(value: LedgerFootprint, io: Buffer): void;
-
-    static isValid(value: LedgerFootprint): boolean;
-
-    static toXDR(value: LedgerFootprint): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): LedgerFootprint;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): LedgerFootprint;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -5788,18 +6213,226 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class InvokeHostFunctionOp {
+  class ContractIdPreimageFromAddress {
+    constructor(attributes: { address: ScAddress; salt: Buffer });
+
+    address(value?: ScAddress): ScAddress;
+
+    salt(value?: Buffer): Buffer;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractIdPreimageFromAddress;
+
+    static write(value: ContractIdPreimageFromAddress, io: Buffer): void;
+
+    static isValid(value: ContractIdPreimageFromAddress): boolean;
+
+    static toXDR(value: ContractIdPreimageFromAddress): Buffer;
+
+    static fromXDR(
+      input: Buffer,
+      format?: 'raw'
+    ): ContractIdPreimageFromAddress;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ContractIdPreimageFromAddress;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class CreateContractArgs {
     constructor(attributes: {
-      function: HostFunction;
-      parameters: ScVal[];
-      footprint: LedgerFootprint;
+      contractIdPreimage: ContractIdPreimage;
+      executable: ContractExecutable;
     });
 
-    function(value?: HostFunction): HostFunction;
+    contractIdPreimage(value?: ContractIdPreimage): ContractIdPreimage;
 
-    parameters(value?: ScVal[]): ScVal[];
+    executable(value?: ContractExecutable): ContractExecutable;
 
-    footprint(value?: LedgerFootprint): LedgerFootprint;
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): CreateContractArgs;
+
+    static write(value: CreateContractArgs, io: Buffer): void;
+
+    static isValid(value: CreateContractArgs): boolean;
+
+    static toXDR(value: CreateContractArgs): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): CreateContractArgs;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): CreateContractArgs;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class InvokeContractArgs {
+    constructor(attributes: {
+      contractAddress: ScAddress;
+      functionName: string | Buffer;
+      args: ScVal[];
+    });
+
+    contractAddress(value?: ScAddress): ScAddress;
+
+    functionName(value?: string | Buffer): string | Buffer;
+
+    args(value?: ScVal[]): ScVal[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): InvokeContractArgs;
+
+    static write(value: InvokeContractArgs, io: Buffer): void;
+
+    static isValid(value: InvokeContractArgs): boolean;
+
+    static toXDR(value: InvokeContractArgs): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): InvokeContractArgs;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): InvokeContractArgs;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanAuthorizedInvocation {
+    constructor(attributes: {
+      function: SorobanAuthorizedFunction;
+      subInvocations: SorobanAuthorizedInvocation[];
+    });
+
+    function(value?: SorobanAuthorizedFunction): SorobanAuthorizedFunction;
+
+    subInvocations(
+      value?: SorobanAuthorizedInvocation[]
+    ): SorobanAuthorizedInvocation[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanAuthorizedInvocation;
+
+    static write(value: SorobanAuthorizedInvocation, io: Buffer): void;
+
+    static isValid(value: SorobanAuthorizedInvocation): boolean;
+
+    static toXDR(value: SorobanAuthorizedInvocation): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanAuthorizedInvocation;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanAuthorizedInvocation;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanAddressCredentials {
+    constructor(attributes: {
+      address: ScAddress;
+      nonce: Int64;
+      signatureExpirationLedger: number;
+      signature: ScVal;
+    });
+
+    address(value?: ScAddress): ScAddress;
+
+    nonce(value?: Int64): Int64;
+
+    signatureExpirationLedger(value?: number): number;
+
+    signature(value?: ScVal): ScVal;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanAddressCredentials;
+
+    static write(value: SorobanAddressCredentials, io: Buffer): void;
+
+    static isValid(value: SorobanAddressCredentials): boolean;
+
+    static toXDR(value: SorobanAddressCredentials): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanAddressCredentials;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanAddressCredentials;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanAuthorizationEntry {
+    constructor(attributes: {
+      credentials: SorobanCredentials;
+      rootInvocation: SorobanAuthorizedInvocation;
+    });
+
+    credentials(value?: SorobanCredentials): SorobanCredentials;
+
+    rootInvocation(
+      value?: SorobanAuthorizedInvocation
+    ): SorobanAuthorizedInvocation;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanAuthorizationEntry;
+
+    static write(value: SorobanAuthorizationEntry, io: Buffer): void;
+
+    static isValid(value: SorobanAuthorizationEntry): boolean;
+
+    static toXDR(value: SorobanAuthorizationEntry): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanAuthorizationEntry;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanAuthorizationEntry;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class InvokeHostFunctionOp {
+    constructor(attributes: {
+      hostFunction: HostFunction;
+      auth: SorobanAuthorizationEntry[];
+    });
+
+    hostFunction(value?: HostFunction): HostFunction;
+
+    auth(value?: SorobanAuthorizationEntry[]): SorobanAuthorizationEntry[];
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -5825,7 +6458,64 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class Operation2 {
+  class ExtendFootprintTtlOp {
+    constructor(attributes: { ext: ExtensionPoint; extendTo: number });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    extendTo(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ExtendFootprintTtlOp;
+
+    static write(value: ExtendFootprintTtlOp, io: Buffer): void;
+
+    static isValid(value: ExtendFootprintTtlOp): boolean;
+
+    static toXDR(value: ExtendFootprintTtlOp): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ExtendFootprintTtlOp;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ExtendFootprintTtlOp;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class RestoreFootprintOp {
+    constructor(attributes: { ext: ExtensionPoint });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): RestoreFootprintOp;
+
+    static write(value: RestoreFootprintOp, io: Buffer): void;
+
+    static isValid(value: RestoreFootprintOp): boolean;
+
+    static toXDR(value: RestoreFootprintOp): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): RestoreFootprintOp;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): RestoreFootprintOp;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class Operation {
     constructor(attributes: {
       sourceAccount: null | MuxedAccount;
       body: OperationBody;
@@ -5936,46 +6626,15 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class HashIdPreimageEd25519ContractId {
-    constructor(attributes: { ed25519: Buffer; salt: Buffer });
-
-    ed25519(value?: Buffer): Buffer;
-
-    salt(value?: Buffer): Buffer;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): HashIdPreimageEd25519ContractId;
-
-    static write(value: HashIdPreimageEd25519ContractId, io: Buffer): void;
-
-    static isValid(value: HashIdPreimageEd25519ContractId): boolean;
-
-    static toXDR(value: HashIdPreimageEd25519ContractId): Buffer;
-
-    static fromXDR(
-      input: Buffer,
-      format?: 'raw'
-    ): HashIdPreimageEd25519ContractId;
-
-    static fromXDR(
-      input: string,
-      format: 'hex' | 'base64'
-    ): HashIdPreimageEd25519ContractId;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
   class HashIdPreimageContractId {
-    constructor(attributes: { contractId: Buffer; salt: Buffer });
+    constructor(attributes: {
+      networkId: Buffer;
+      contractIdPreimage: ContractIdPreimage;
+    });
 
-    contractId(value?: Buffer): Buffer;
+    networkId(value?: Buffer): Buffer;
 
-    salt(value?: Buffer): Buffer;
+    contractIdPreimage(value?: ContractIdPreimage): ContractIdPreimage;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -5995,6 +6654,51 @@ export namespace xdr {
       input: string,
       format: 'hex' | 'base64'
     ): HashIdPreimageContractId;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class HashIdPreimageSorobanAuthorization {
+    constructor(attributes: {
+      networkId: Buffer;
+      nonce: Int64;
+      signatureExpirationLedger: number;
+      invocation: SorobanAuthorizedInvocation;
+    });
+
+    networkId(value?: Buffer): Buffer;
+
+    nonce(value?: Int64): Int64;
+
+    signatureExpirationLedger(value?: number): number;
+
+    invocation(
+      value?: SorobanAuthorizedInvocation
+    ): SorobanAuthorizedInvocation;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): HashIdPreimageSorobanAuthorization;
+
+    static write(value: HashIdPreimageSorobanAuthorization, io: Buffer): void;
+
+    static isValid(value: HashIdPreimageSorobanAuthorization): boolean;
+
+    static toXDR(value: HashIdPreimageSorobanAuthorization): Buffer;
+
+    static fromXDR(
+      input: Buffer,
+      format?: 'raw'
+    ): HashIdPreimageSorobanAuthorization;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): HashIdPreimageSorobanAuthorization;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -6094,6 +6798,108 @@ export namespace xdr {
     static fromXDR(input: Buffer, format?: 'raw'): PreconditionsV2;
 
     static fromXDR(input: string, format: 'hex' | 'base64'): PreconditionsV2;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class LedgerFootprint {
+    constructor(attributes: { readOnly: LedgerKey[]; readWrite: LedgerKey[] });
+
+    readOnly(value?: LedgerKey[]): LedgerKey[];
+
+    readWrite(value?: LedgerKey[]): LedgerKey[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): LedgerFootprint;
+
+    static write(value: LedgerFootprint, io: Buffer): void;
+
+    static isValid(value: LedgerFootprint): boolean;
+
+    static toXDR(value: LedgerFootprint): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): LedgerFootprint;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): LedgerFootprint;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanResources {
+    constructor(attributes: {
+      footprint: LedgerFootprint;
+      instructions: number;
+      readBytes: number;
+      writeBytes: number;
+    });
+
+    footprint(value?: LedgerFootprint): LedgerFootprint;
+
+    instructions(value?: number): number;
+
+    readBytes(value?: number): number;
+
+    writeBytes(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanResources;
+
+    static write(value: SorobanResources, io: Buffer): void;
+
+    static isValid(value: SorobanResources): boolean;
+
+    static toXDR(value: SorobanResources): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanResources;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): SorobanResources;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanTransactionData {
+    constructor(attributes: {
+      ext: ExtensionPoint;
+      resources: SorobanResources;
+      resourceFee: Int64;
+    });
+
+    ext(value?: ExtensionPoint): ExtensionPoint;
+
+    resources(value?: SorobanResources): SorobanResources;
+
+    resourceFee(value?: Int64): Int64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanTransactionData;
+
+    static write(value: SorobanTransactionData, io: Buffer): void;
+
+    static isValid(value: SorobanTransactionData): boolean;
+
+    static toXDR(value: SorobanTransactionData): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanTransactionData;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanTransactionData;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -6906,6 +7712,193 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
+  class UInt128Parts {
+    constructor(attributes: { hi: Uint64; lo: Uint64 });
+
+    hi(value?: Uint64): Uint64;
+
+    lo(value?: Uint64): Uint64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): UInt128Parts;
+
+    static write(value: UInt128Parts, io: Buffer): void;
+
+    static isValid(value: UInt128Parts): boolean;
+
+    static toXDR(value: UInt128Parts): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): UInt128Parts;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): UInt128Parts;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class Int128Parts {
+    constructor(attributes: { hi: Int64; lo: Uint64 });
+
+    hi(value?: Int64): Int64;
+
+    lo(value?: Uint64): Uint64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): Int128Parts;
+
+    static write(value: Int128Parts, io: Buffer): void;
+
+    static isValid(value: Int128Parts): boolean;
+
+    static toXDR(value: Int128Parts): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): Int128Parts;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): Int128Parts;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class UInt256Parts {
+    constructor(attributes: {
+      hiHi: Uint64;
+      hiLo: Uint64;
+      loHi: Uint64;
+      loLo: Uint64;
+    });
+
+    hiHi(value?: Uint64): Uint64;
+
+    hiLo(value?: Uint64): Uint64;
+
+    loHi(value?: Uint64): Uint64;
+
+    loLo(value?: Uint64): Uint64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): UInt256Parts;
+
+    static write(value: UInt256Parts, io: Buffer): void;
+
+    static isValid(value: UInt256Parts): boolean;
+
+    static toXDR(value: UInt256Parts): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): UInt256Parts;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): UInt256Parts;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class Int256Parts {
+    constructor(attributes: {
+      hiHi: Int64;
+      hiLo: Uint64;
+      loHi: Uint64;
+      loLo: Uint64;
+    });
+
+    hiHi(value?: Int64): Int64;
+
+    hiLo(value?: Uint64): Uint64;
+
+    loHi(value?: Uint64): Uint64;
+
+    loLo(value?: Uint64): Uint64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): Int256Parts;
+
+    static write(value: Int256Parts, io: Buffer): void;
+
+    static isValid(value: Int256Parts): boolean;
+
+    static toXDR(value: Int256Parts): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): Int256Parts;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): Int256Parts;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScNonceKey {
+    constructor(attributes: { nonce: Int64 });
+
+    nonce(value?: Int64): Int64;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScNonceKey;
+
+    static write(value: ScNonceKey, io: Buffer): void;
+
+    static isValid(value: ScNonceKey): boolean;
+
+    static toXDR(value: ScNonceKey): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScNonceKey;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScNonceKey;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScContractInstance {
+    constructor(attributes: {
+      executable: ContractExecutable;
+      storage: null | ScMapEntry[];
+    });
+
+    executable(value?: ContractExecutable): ContractExecutable;
+
+    storage(value?: null | ScMapEntry[]): null | ScMapEntry[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScContractInstance;
+
+    static write(value: ScContractInstance, io: Buffer): void;
+
+    static isValid(value: ScContractInstance): boolean;
+
+    static toXDR(value: ScContractInstance): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScContractInstance;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScContractInstance;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
   class ScMapEntry {
     constructor(attributes: { key: ScVal; val: ScVal });
 
@@ -7048,32 +8041,6 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ScSpecTypeSet {
-    constructor(attributes: { elementType: ScSpecTypeDef });
-
-    elementType(value?: ScSpecTypeDef): ScSpecTypeDef;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ScSpecTypeSet;
-
-    static write(value: ScSpecTypeSet, io: Buffer): void;
-
-    static isValid(value: ScSpecTypeSet): boolean;
-
-    static toXDR(value: ScSpecTypeSet): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ScSpecTypeSet;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScSpecTypeSet;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
   class ScSpecTypeTuple {
     constructor(attributes: { valueTypes: ScSpecTypeDef[] });
 
@@ -7094,6 +8061,32 @@ export namespace xdr {
     static fromXDR(input: Buffer, format?: 'raw'): ScSpecTypeTuple;
 
     static fromXDR(input: string, format: 'hex' | 'base64'): ScSpecTypeTuple;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecTypeBytesN {
+    constructor(attributes: { n: number });
+
+    n(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecTypeBytesN;
+
+    static write(value: ScSpecTypeBytesN, io: Buffer): void;
+
+    static isValid(value: ScSpecTypeBytesN): boolean;
+
+    static toXDR(value: ScSpecTypeBytesN): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecTypeBytesN;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScSpecTypeBytesN;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -7127,7 +8120,13 @@ export namespace xdr {
   }
 
   class ScSpecUdtStructFieldV0 {
-    constructor(attributes: { name: string | Buffer; type: ScSpecTypeDef });
+    constructor(attributes: {
+      doc: string | Buffer;
+      name: string | Buffer;
+      type: ScSpecTypeDef;
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
 
     name(value?: string | Buffer): string | Buffer;
 
@@ -7159,9 +8158,15 @@ export namespace xdr {
 
   class ScSpecUdtStructV0 {
     constructor(attributes: {
+      doc: string | Buffer;
+      lib: string | Buffer;
       name: string | Buffer;
       fields: ScSpecUdtStructFieldV0[];
     });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    lib(value?: string | Buffer): string | Buffer;
 
     name(value?: string | Buffer): string | Buffer;
 
@@ -7188,34 +8193,68 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ScSpecUdtUnionCaseV0 {
-    constructor(attributes: {
-      name: string | Buffer;
-      type: null | ScSpecTypeDef;
-    });
+  class ScSpecUdtUnionCaseVoidV0 {
+    constructor(attributes: { doc: string | Buffer; name: string | Buffer });
+
+    doc(value?: string | Buffer): string | Buffer;
 
     name(value?: string | Buffer): string | Buffer;
-
-    type(value?: null | ScSpecTypeDef): null | ScSpecTypeDef;
 
     toXDR(format?: 'raw'): Buffer;
 
     toXDR(format: 'hex' | 'base64'): string;
 
-    static read(io: Buffer): ScSpecUdtUnionCaseV0;
+    static read(io: Buffer): ScSpecUdtUnionCaseVoidV0;
 
-    static write(value: ScSpecUdtUnionCaseV0, io: Buffer): void;
+    static write(value: ScSpecUdtUnionCaseVoidV0, io: Buffer): void;
 
-    static isValid(value: ScSpecUdtUnionCaseV0): boolean;
+    static isValid(value: ScSpecUdtUnionCaseVoidV0): boolean;
 
-    static toXDR(value: ScSpecUdtUnionCaseV0): Buffer;
+    static toXDR(value: ScSpecUdtUnionCaseVoidV0): Buffer;
 
-    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtUnionCaseV0;
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtUnionCaseVoidV0;
 
     static fromXDR(
       input: string,
       format: 'hex' | 'base64'
-    ): ScSpecUdtUnionCaseV0;
+    ): ScSpecUdtUnionCaseVoidV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecUdtUnionCaseTupleV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      name: string | Buffer;
+      type: ScSpecTypeDef[];
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    type(value?: ScSpecTypeDef[]): ScSpecTypeDef[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtUnionCaseTupleV0;
+
+    static write(value: ScSpecUdtUnionCaseTupleV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtUnionCaseTupleV0): boolean;
+
+    static toXDR(value: ScSpecUdtUnionCaseTupleV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtUnionCaseTupleV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecUdtUnionCaseTupleV0;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -7224,9 +8263,15 @@ export namespace xdr {
 
   class ScSpecUdtUnionV0 {
     constructor(attributes: {
+      doc: string | Buffer;
+      lib: string | Buffer;
       name: string | Buffer;
       cases: ScSpecUdtUnionCaseV0[];
     });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    lib(value?: string | Buffer): string | Buffer;
 
     name(value?: string | Buffer): string | Buffer;
 
@@ -7253,18 +8298,209 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ScSpecFunctionV0 {
+  class ScSpecUdtEnumCaseV0 {
     constructor(attributes: {
+      doc: string | Buffer;
       name: string | Buffer;
-      inputTypes: ScSpecTypeDef[];
-      outputTypes: ScSpecTypeDef[];
+      value: number;
     });
+
+    doc(value?: string | Buffer): string | Buffer;
 
     name(value?: string | Buffer): string | Buffer;
 
-    inputTypes(value?: ScSpecTypeDef[]): ScSpecTypeDef[];
+    value(value?: number): number;
 
-    outputTypes(value?: ScSpecTypeDef[]): ScSpecTypeDef[];
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtEnumCaseV0;
+
+    static write(value: ScSpecUdtEnumCaseV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtEnumCaseV0): boolean;
+
+    static toXDR(value: ScSpecUdtEnumCaseV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtEnumCaseV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecUdtEnumCaseV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecUdtEnumV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      lib: string | Buffer;
+      name: string | Buffer;
+      cases: ScSpecUdtEnumCaseV0[];
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    lib(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    cases(value?: ScSpecUdtEnumCaseV0[]): ScSpecUdtEnumCaseV0[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtEnumV0;
+
+    static write(value: ScSpecUdtEnumV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtEnumV0): boolean;
+
+    static toXDR(value: ScSpecUdtEnumV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtEnumV0;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScSpecUdtEnumV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecUdtErrorEnumCaseV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      name: string | Buffer;
+      value: number;
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    value(value?: number): number;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtErrorEnumCaseV0;
+
+    static write(value: ScSpecUdtErrorEnumCaseV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtErrorEnumCaseV0): boolean;
+
+    static toXDR(value: ScSpecUdtErrorEnumCaseV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtErrorEnumCaseV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecUdtErrorEnumCaseV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecUdtErrorEnumV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      lib: string | Buffer;
+      name: string | Buffer;
+      cases: ScSpecUdtErrorEnumCaseV0[];
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    lib(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    cases(value?: ScSpecUdtErrorEnumCaseV0[]): ScSpecUdtErrorEnumCaseV0[];
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtErrorEnumV0;
+
+    static write(value: ScSpecUdtErrorEnumV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtErrorEnumV0): boolean;
+
+    static toXDR(value: ScSpecUdtErrorEnumV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtErrorEnumV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecUdtErrorEnumV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecFunctionInputV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      name: string | Buffer;
+      type: ScSpecTypeDef;
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    type(value?: ScSpecTypeDef): ScSpecTypeDef;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecFunctionInputV0;
+
+    static write(value: ScSpecFunctionInputV0, io: Buffer): void;
+
+    static isValid(value: ScSpecFunctionInputV0): boolean;
+
+    static toXDR(value: ScSpecFunctionInputV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecFunctionInputV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecFunctionInputV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScSpecFunctionV0 {
+    constructor(attributes: {
+      doc: string | Buffer;
+      name: string | Buffer;
+      inputs: ScSpecFunctionInputV0[];
+      outputs: ScSpecTypeDef[];
+    });
+
+    doc(value?: string | Buffer): string | Buffer;
+
+    name(value?: string | Buffer): string | Buffer;
+
+    inputs(value?: ScSpecFunctionInputV0[]): ScSpecFunctionInputV0[];
+
+    outputs(value?: ScSpecTypeDef[]): ScSpecTypeDef[];
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -7927,67 +9163,6 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ConfigSetting {
-    switch(): ConfigSettingType;
-
-    uint32Val(value?: number): number;
-
-    static configSettingTypeUint32(value: number): ConfigSetting;
-
-    value(): number;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ConfigSetting;
-
-    static write(value: ConfigSetting, io: Buffer): void;
-
-    static isValid(value: ConfigSetting): boolean;
-
-    static toXDR(value: ConfigSetting): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ConfigSetting;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ConfigSetting;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class ConfigSettingEntryExt {
-    switch(): number;
-
-    static 0(): ConfigSettingEntryExt;
-
-    value(): void;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ConfigSettingEntryExt;
-
-    static write(value: ConfigSettingEntryExt, io: Buffer): void;
-
-    static isValid(value: ConfigSettingEntryExt): boolean;
-
-    static toXDR(value: ConfigSettingEntryExt): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ConfigSettingEntryExt;
-
-    static fromXDR(
-      input: string,
-      format: 'hex' | 'base64'
-    ): ConfigSettingEntryExt;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
   class LedgerEntryExtensionV1Ext {
     switch(): number;
 
@@ -8036,7 +9211,11 @@ export namespace xdr {
 
     contractData(value?: ContractDataEntry): ContractDataEntry;
 
+    contractCode(value?: ContractCodeEntry): ContractCodeEntry;
+
     configSetting(value?: ConfigSettingEntry): ConfigSettingEntry;
+
+    ttl(value?: TtlEntry): TtlEntry;
 
     static account(value: AccountEntry): LedgerEntryData;
 
@@ -8052,7 +9231,11 @@ export namespace xdr {
 
     static contractData(value: ContractDataEntry): LedgerEntryData;
 
+    static contractCode(value: ContractCodeEntry): LedgerEntryData;
+
     static configSetting(value: ConfigSettingEntry): LedgerEntryData;
+
+    static ttl(value: TtlEntry): LedgerEntryData;
 
     value():
       | AccountEntry
@@ -8062,7 +9245,9 @@ export namespace xdr {
       | ClaimableBalanceEntry
       | LiquidityPoolEntry
       | ContractDataEntry
-      | ConfigSettingEntry;
+      | ContractCodeEntry
+      | ConfigSettingEntry
+      | TtlEntry;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -8136,7 +9321,11 @@ export namespace xdr {
 
     contractData(value?: LedgerKeyContractData): LedgerKeyContractData;
 
+    contractCode(value?: LedgerKeyContractCode): LedgerKeyContractCode;
+
     configSetting(value?: LedgerKeyConfigSetting): LedgerKeyConfigSetting;
+
+    ttl(value?: LedgerKeyTtl): LedgerKeyTtl;
 
     static account(value: LedgerKeyAccount): LedgerKey;
 
@@ -8152,7 +9341,11 @@ export namespace xdr {
 
     static contractData(value: LedgerKeyContractData): LedgerKey;
 
+    static contractCode(value: LedgerKeyContractCode): LedgerKey;
+
     static configSetting(value: LedgerKeyConfigSetting): LedgerKey;
+
+    static ttl(value: LedgerKeyTtl): LedgerKey;
 
     value():
       | LedgerKeyAccount
@@ -8162,7 +9355,9 @@ export namespace xdr {
       | LedgerKeyClaimableBalance
       | LedgerKeyLiquidityPool
       | LedgerKeyContractData
-      | LedgerKeyConfigSetting;
+      | LedgerKeyContractCode
+      | LedgerKeyConfigSetting
+      | LedgerKeyTtl;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -8297,9 +9492,9 @@ export namespace xdr {
 
     newFlags(value?: number): number;
 
-    configSetting(
-      value?: LedgerUpgradeConfigSetting
-    ): LedgerUpgradeConfigSetting;
+    newConfig(value?: ConfigUpgradeSetKey): ConfigUpgradeSetKey;
+
+    newMaxSorobanTxSetSize(value?: number): number;
 
     static ledgerUpgradeVersion(value: number): LedgerUpgrade;
 
@@ -8311,9 +9506,9 @@ export namespace xdr {
 
     static ledgerUpgradeFlags(value: number): LedgerUpgrade;
 
-    static ledgerUpgradeConfig(
-      value: LedgerUpgradeConfigSetting
-    ): LedgerUpgrade;
+    static ledgerUpgradeConfig(value: ConfigUpgradeSetKey): LedgerUpgrade;
+
+    static ledgerUpgradeMaxSorobanTxSetSize(value: number): LedgerUpgrade;
 
     value():
       | number
@@ -8321,7 +9516,8 @@ export namespace xdr {
       | number
       | number
       | number
-      | LedgerUpgradeConfigSetting;
+      | ConfigUpgradeSetKey
+      | number;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -8683,6 +9879,36 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
+  class ContractEventBody {
+    switch(): number;
+
+    v0(value?: ContractEventV0): ContractEventV0;
+
+    static 0(value: ContractEventV0): ContractEventBody;
+
+    value(): ContractEventV0;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractEventBody;
+
+    static write(value: ContractEventBody, io: Buffer): void;
+
+    static isValid(value: ContractEventBody): boolean;
+
+    static toXDR(value: ContractEventBody): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ContractEventBody;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractEventBody;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
   class TransactionMeta {
     switch(): number;
 
@@ -8692,13 +9918,21 @@ export namespace xdr {
 
     v2(value?: TransactionMetaV2): TransactionMetaV2;
 
+    v3(value?: TransactionMetaV3): TransactionMetaV3;
+
     static 0(value: OperationMeta[]): TransactionMeta;
 
     static 1(value: TransactionMetaV1): TransactionMeta;
 
     static 2(value: TransactionMetaV2): TransactionMeta;
 
-    value(): OperationMeta[] | TransactionMetaV1 | TransactionMetaV2;
+    static 3(value: TransactionMetaV3): TransactionMeta;
+
+    value():
+      | OperationMeta[]
+      | TransactionMetaV1
+      | TransactionMetaV2
+      | TransactionMetaV3;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -8790,13 +10024,25 @@ export namespace xdr {
   }
 
   class SurveyResponseBody {
-    switch(): SurveyMessageCommandType;
+    switch(): SurveyMessageResponseType;
 
-    topologyResponseBody(value?: TopologyResponseBody): TopologyResponseBody;
+    topologyResponseBodyV0(
+      value?: TopologyResponseBodyV0
+    ): TopologyResponseBodyV0;
 
-    static surveyTopology(value: TopologyResponseBody): SurveyResponseBody;
+    topologyResponseBodyV1(
+      value?: TopologyResponseBodyV1
+    ): TopologyResponseBodyV1;
 
-    value(): TopologyResponseBody;
+    static surveyTopologyResponseV0(
+      value: TopologyResponseBodyV0
+    ): SurveyResponseBody;
+
+    static surveyTopologyResponseV1(
+      value: TopologyResponseBodyV1
+    ): SurveyResponseBody;
+
+    value(): TopologyResponseBodyV0 | TopologyResponseBodyV1;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -8860,6 +10106,12 @@ export namespace xdr {
 
     sendMoreMessage(value?: SendMore): SendMore;
 
+    sendMoreExtendedMessage(value?: SendMoreExtended): SendMoreExtended;
+
+    floodAdvert(value?: FloodAdvert): FloodAdvert;
+
+    floodDemand(value?: FloodDemand): FloodDemand;
+
     static errorMsg(value: Error): StellarMessage;
 
     static hello(value: Hello): StellarMessage;
@@ -8894,6 +10146,12 @@ export namespace xdr {
 
     static sendMore(value: SendMore): StellarMessage;
 
+    static sendMoreExtended(value: SendMoreExtended): StellarMessage;
+
+    static floodAdvert(value: FloodAdvert): StellarMessage;
+
+    static floodDemand(value: FloodDemand): StellarMessage;
+
     value():
       | Error
       | Hello
@@ -8911,6 +10169,9 @@ export namespace xdr {
       | ScpEnvelope
       | number
       | SendMore
+      | SendMoreExtended
+      | FloodAdvert
+      | FloodDemand
       | void;
 
     toXDR(format?: 'raw'): Buffer;
@@ -9117,6 +10378,161 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
+  class ContractIdPreimage {
+    switch(): ContractIdPreimageType;
+
+    fromAddress(
+      value?: ContractIdPreimageFromAddress
+    ): ContractIdPreimageFromAddress;
+
+    fromAsset(value?: Asset): Asset;
+
+    static contractIdPreimageFromAddress(
+      value: ContractIdPreimageFromAddress
+    ): ContractIdPreimage;
+
+    static contractIdPreimageFromAsset(value: Asset): ContractIdPreimage;
+
+    value(): ContractIdPreimageFromAddress | Asset;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractIdPreimage;
+
+    static write(value: ContractIdPreimage, io: Buffer): void;
+
+    static isValid(value: ContractIdPreimage): boolean;
+
+    static toXDR(value: ContractIdPreimage): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ContractIdPreimage;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractIdPreimage;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class HostFunction {
+    switch(): HostFunctionType;
+
+    invokeContract(value?: InvokeContractArgs): InvokeContractArgs;
+
+    createContract(value?: CreateContractArgs): CreateContractArgs;
+
+    wasm(value?: Buffer): Buffer;
+
+    static hostFunctionTypeInvokeContract(
+      value: InvokeContractArgs
+    ): HostFunction;
+
+    static hostFunctionTypeCreateContract(
+      value: CreateContractArgs
+    ): HostFunction;
+
+    static hostFunctionTypeUploadContractWasm(value: Buffer): HostFunction;
+
+    value(): InvokeContractArgs | CreateContractArgs | Buffer;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): HostFunction;
+
+    static write(value: HostFunction, io: Buffer): void;
+
+    static isValid(value: HostFunction): boolean;
+
+    static toXDR(value: HostFunction): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): HostFunction;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): HostFunction;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanAuthorizedFunction {
+    switch(): SorobanAuthorizedFunctionType;
+
+    contractFn(value?: InvokeContractArgs): InvokeContractArgs;
+
+    createContractHostFn(value?: CreateContractArgs): CreateContractArgs;
+
+    static sorobanAuthorizedFunctionTypeContractFn(
+      value: InvokeContractArgs
+    ): SorobanAuthorizedFunction;
+
+    static sorobanAuthorizedFunctionTypeCreateContractHostFn(
+      value: CreateContractArgs
+    ): SorobanAuthorizedFunction;
+
+    value(): InvokeContractArgs | CreateContractArgs;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanAuthorizedFunction;
+
+    static write(value: SorobanAuthorizedFunction, io: Buffer): void;
+
+    static isValid(value: SorobanAuthorizedFunction): boolean;
+
+    static toXDR(value: SorobanAuthorizedFunction): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanAuthorizedFunction;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): SorobanAuthorizedFunction;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class SorobanCredentials {
+    switch(): SorobanCredentialsType;
+
+    address(value?: SorobanAddressCredentials): SorobanAddressCredentials;
+
+    static sorobanCredentialsSourceAccount(): SorobanCredentials;
+
+    static sorobanCredentialsAddress(
+      value: SorobanAddressCredentials
+    ): SorobanCredentials;
+
+    value(): SorobanAddressCredentials | void;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): SorobanCredentials;
+
+    static write(value: SorobanCredentials, io: Buffer): void;
+
+    static isValid(value: SorobanCredentials): boolean;
+
+    static toXDR(value: SorobanCredentials): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): SorobanCredentials;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): SorobanCredentials;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
   class OperationBody {
     switch(): OperationType;
 
@@ -9184,6 +10600,10 @@ export namespace xdr {
 
     invokeHostFunctionOp(value?: InvokeHostFunctionOp): InvokeHostFunctionOp;
 
+    extendFootprintTtlOp(value?: ExtendFootprintTtlOp): ExtendFootprintTtlOp;
+
+    restoreFootprintOp(value?: RestoreFootprintOp): RestoreFootprintOp;
+
     static createAccount(value: CreateAccountOp): OperationBody;
 
     static payment(value: PaymentOp): OperationBody;
@@ -9244,6 +10664,10 @@ export namespace xdr {
 
     static invokeHostFunction(value: InvokeHostFunctionOp): OperationBody;
 
+    static extendFootprintTtl(value: ExtendFootprintTtlOp): OperationBody;
+
+    static restoreFootprint(value: RestoreFootprintOp): OperationBody;
+
     value():
       | CreateAccountOp
       | PaymentOp
@@ -9268,6 +10692,8 @@ export namespace xdr {
       | LiquidityPoolDepositOp
       | LiquidityPoolWithdrawOp
       | InvokeHostFunctionOp
+      | ExtendFootprintTtlOp
+      | RestoreFootprintOp
       | void;
 
     toXDR(format?: 'raw'): Buffer;
@@ -9298,11 +10724,11 @@ export namespace xdr {
 
     revokeId(value?: HashIdPreimageRevokeId): HashIdPreimageRevokeId;
 
-    ed25519ContractId(
-      value?: HashIdPreimageEd25519ContractId
-    ): HashIdPreimageEd25519ContractId;
-
     contractId(value?: HashIdPreimageContractId): HashIdPreimageContractId;
+
+    sorobanAuthorization(
+      value?: HashIdPreimageSorobanAuthorization
+    ): HashIdPreimageSorobanAuthorization;
 
     static envelopeTypeOpId(value: HashIdPreimageOperationId): HashIdPreimage;
 
@@ -9310,19 +10736,19 @@ export namespace xdr {
       value: HashIdPreimageRevokeId
     ): HashIdPreimage;
 
-    static envelopeTypeContractIdFromEd25519(
-      value: HashIdPreimageEd25519ContractId
+    static envelopeTypeContractId(
+      value: HashIdPreimageContractId
     ): HashIdPreimage;
 
-    static envelopeTypeContractIdFromContract(
-      value: HashIdPreimageContractId
+    static envelopeTypeSorobanAuthorization(
+      value: HashIdPreimageSorobanAuthorization
     ): HashIdPreimage;
 
     value():
       | HashIdPreimageOperationId
       | HashIdPreimageRevokeId
-      | HashIdPreimageEd25519ContractId
-      | HashIdPreimageContractId;
+      | HashIdPreimageContractId
+      | HashIdPreimageSorobanAuthorization;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -9456,9 +10882,13 @@ export namespace xdr {
   class TransactionExt {
     switch(): number;
 
+    sorobanData(value?: SorobanTransactionData): SorobanTransactionData;
+
     static 0(): TransactionExt;
 
-    value(): void;
+    static 1(value: SorobanTransactionData): TransactionExt;
+
+    value(): SorobanTransactionData | void;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -10739,13 +12169,21 @@ export namespace xdr {
   class InvokeHostFunctionResult {
     switch(): InvokeHostFunctionResultCode;
 
-    static invokeHostFunctionSuccess(): InvokeHostFunctionResult;
+    success(value?: Buffer): Buffer;
+
+    static invokeHostFunctionSuccess(value: Buffer): InvokeHostFunctionResult;
 
     static invokeHostFunctionMalformed(): InvokeHostFunctionResult;
 
     static invokeHostFunctionTrapped(): InvokeHostFunctionResult;
 
-    value(): void;
+    static invokeHostFunctionResourceLimitExceeded(): InvokeHostFunctionResult;
+
+    static invokeHostFunctionEntryArchived(): InvokeHostFunctionResult;
+
+    static invokeHostFunctionInsufficientRefundableFee(): InvokeHostFunctionResult;
+
+    value(): Buffer | void;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -10765,6 +12203,80 @@ export namespace xdr {
       input: string,
       format: 'hex' | 'base64'
     ): InvokeHostFunctionResult;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ExtendFootprintTtlResult {
+    switch(): ExtendFootprintTtlResultCode;
+
+    static extendFootprintTtlSuccess(): ExtendFootprintTtlResult;
+
+    static extendFootprintTtlMalformed(): ExtendFootprintTtlResult;
+
+    static extendFootprintTtlResourceLimitExceeded(): ExtendFootprintTtlResult;
+
+    static extendFootprintTtlInsufficientRefundableFee(): ExtendFootprintTtlResult;
+
+    value(): void;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ExtendFootprintTtlResult;
+
+    static write(value: ExtendFootprintTtlResult, io: Buffer): void;
+
+    static isValid(value: ExtendFootprintTtlResult): boolean;
+
+    static toXDR(value: ExtendFootprintTtlResult): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ExtendFootprintTtlResult;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ExtendFootprintTtlResult;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class RestoreFootprintResult {
+    switch(): RestoreFootprintResultCode;
+
+    static restoreFootprintSuccess(): RestoreFootprintResult;
+
+    static restoreFootprintMalformed(): RestoreFootprintResult;
+
+    static restoreFootprintResourceLimitExceeded(): RestoreFootprintResult;
+
+    static restoreFootprintInsufficientRefundableFee(): RestoreFootprintResult;
+
+    value(): void;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): RestoreFootprintResult;
+
+    static write(value: RestoreFootprintResult, io: Buffer): void;
+
+    static isValid(value: RestoreFootprintResult): boolean;
+
+    static toXDR(value: RestoreFootprintResult): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): RestoreFootprintResult;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): RestoreFootprintResult;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -10850,6 +12362,14 @@ export namespace xdr {
       value?: InvokeHostFunctionResult
     ): InvokeHostFunctionResult;
 
+    extendFootprintTtlResult(
+      value?: ExtendFootprintTtlResult
+    ): ExtendFootprintTtlResult;
+
+    restoreFootprintResult(
+      value?: RestoreFootprintResult
+    ): RestoreFootprintResult;
+
     static createAccount(value: CreateAccountResult): OperationResultTr;
 
     static payment(value: PaymentResult): OperationResultTr;
@@ -10922,6 +12442,12 @@ export namespace xdr {
       value: InvokeHostFunctionResult
     ): OperationResultTr;
 
+    static extendFootprintTtl(
+      value: ExtendFootprintTtlResult
+    ): OperationResultTr;
+
+    static restoreFootprint(value: RestoreFootprintResult): OperationResultTr;
+
     value():
       | CreateAccountResult
       | PaymentResult
@@ -10947,7 +12473,9 @@ export namespace xdr {
       | SetTrustLineFlagsResult
       | LiquidityPoolDepositResult
       | LiquidityPoolWithdrawResult
-      | InvokeHostFunctionResult;
+      | InvokeHostFunctionResult
+      | ExtendFootprintTtlResult
+      | RestoreFootprintResult;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -11048,6 +12576,8 @@ export namespace xdr {
     static txBadMinSeqAgeOrGap(): InnerTransactionResultResult;
 
     static txMalformed(): InnerTransactionResultResult;
+
+    static txSorobanInvalid(): InnerTransactionResultResult;
 
     value(): OperationResult[] | void;
 
@@ -11154,6 +12684,8 @@ export namespace xdr {
     static txBadMinSeqAgeOrGap(): TransactionResultResult;
 
     static txMalformed(): TransactionResultResult;
+
+    static txSorobanInvalid(): TransactionResultResult;
 
     value(): InnerTransactionResultPair | OperationResult[] | void;
 
@@ -11316,64 +12848,116 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
-  class ScStatus {
-    switch(): ScStatusType;
+  class ScError {
+    switch(): ScErrorType;
 
-    unknownCode(value?: ScUnknownErrorCode): ScUnknownErrorCode;
+    contractCode(value?: number): number;
 
-    errorCode(value?: ScHostValErrorCode): ScHostValErrorCode;
+    code(value?: ScErrorCode): ScErrorCode;
 
-    errorCode(value?: ScHostObjErrorCode): ScHostObjErrorCode;
+    static sceContract(value: number): ScError;
 
-    errorCode(value?: ScHostFnErrorCode): ScHostFnErrorCode;
+    static sceWasmVm(value: ScErrorCode): ScError;
 
-    errorCode(value?: ScHostStorageErrorCode): ScHostStorageErrorCode;
+    static sceContext(value: ScErrorCode): ScError;
 
-    errorCode(value?: ScHostContextErrorCode): ScHostContextErrorCode;
+    static sceStorage(value: ScErrorCode): ScError;
 
-    errorCode(value?: ScVmErrorCode): ScVmErrorCode;
+    static sceObject(value: ScErrorCode): ScError;
 
-    static sstOk(): ScStatus;
+    static sceCrypto(value: ScErrorCode): ScError;
 
-    static sstUnknownError(value: ScUnknownErrorCode): ScStatus;
+    static sceEvents(value: ScErrorCode): ScError;
 
-    static sstHostValueError(value: ScVmErrorCode): ScStatus;
+    static sceBudget(value: ScErrorCode): ScError;
 
-    static sstHostObjectError(value: ScVmErrorCode): ScStatus;
+    static sceValue(value: ScErrorCode): ScError;
 
-    static sstHostFunctionError(value: ScVmErrorCode): ScStatus;
+    static sceAuth(value: ScErrorCode): ScError;
 
-    static sstHostStorageError(value: ScVmErrorCode): ScStatus;
-
-    static sstHostContextError(value: ScVmErrorCode): ScStatus;
-
-    static sstVmError(value: ScVmErrorCode): ScStatus;
-
-    value():
-      | ScUnknownErrorCode
-      | ScHostValErrorCode
-      | ScHostObjErrorCode
-      | ScHostFnErrorCode
-      | ScHostStorageErrorCode
-      | ScHostContextErrorCode
-      | ScVmErrorCode
-      | void;
+    value(): number | ScErrorCode;
 
     toXDR(format?: 'raw'): Buffer;
 
     toXDR(format: 'hex' | 'base64'): string;
 
-    static read(io: Buffer): ScStatus;
+    static read(io: Buffer): ScError;
 
-    static write(value: ScStatus, io: Buffer): void;
+    static write(value: ScError, io: Buffer): void;
 
-    static isValid(value: ScStatus): boolean;
+    static isValid(value: ScError): boolean;
 
-    static toXDR(value: ScStatus): Buffer;
+    static toXDR(value: ScError): Buffer;
 
-    static fromXDR(input: Buffer, format?: 'raw'): ScStatus;
+    static fromXDR(input: Buffer, format?: 'raw'): ScError;
 
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScStatus;
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScError;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ContractExecutable {
+    switch(): ContractExecutableType;
+
+    wasmHash(value?: Buffer): Buffer;
+
+    static contractExecutableWasm(value: Buffer): ContractExecutable;
+
+    static contractExecutableStellarAsset(): ContractExecutable;
+
+    value(): Buffer | void;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ContractExecutable;
+
+    static write(value: ContractExecutable, io: Buffer): void;
+
+    static isValid(value: ContractExecutable): boolean;
+
+    static toXDR(value: ContractExecutable): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ContractExecutable;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ContractExecutable;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
+  class ScAddress {
+    switch(): ScAddressType;
+
+    accountId(value?: AccountId): AccountId;
+
+    contractId(value?: Buffer): Buffer;
+
+    static scAddressTypeAccount(value: AccountId): ScAddress;
+
+    static scAddressTypeContract(value: Buffer): ScAddress;
+
+    value(): AccountId | Buffer;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScAddress;
+
+    static write(value: ScAddress, io: Buffer): void;
+
+    static isValid(value: ScAddress): boolean;
+
+    static toXDR(value: ScAddress): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScAddress;
+
+    static fromXDR(input: string, format: 'hex' | 'base64'): ScAddress;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -11383,49 +12967,116 @@ export namespace xdr {
   class ScVal {
     switch(): ScValType;
 
-    u63(value?: Int64): Int64;
+    b(value?: boolean): boolean;
+
+    error(value?: ScError): ScError;
 
     u32(value?: number): number;
 
     i32(value?: number): number;
 
-    ic(value?: ScStatic): ScStatic;
+    u64(value?: Uint64): Uint64;
 
-    obj(value?: null | ScObject): null | ScObject;
+    i64(value?: Int64): Int64;
+
+    timepoint(value?: TimePoint): TimePoint;
+
+    duration(value?: Duration): Duration;
+
+    u128(value?: UInt128Parts): UInt128Parts;
+
+    i128(value?: Int128Parts): Int128Parts;
+
+    u256(value?: UInt256Parts): UInt256Parts;
+
+    i256(value?: Int256Parts): Int256Parts;
+
+    bytes(value?: Buffer): Buffer;
+
+    str(value?: string | Buffer): string | Buffer;
 
     sym(value?: string | Buffer): string | Buffer;
 
-    bits(value?: Uint64): Uint64;
+    vec(value?: null | ScVal[]): null | ScVal[];
 
-    status(value?: ScStatus): ScStatus;
+    map(value?: null | ScMapEntry[]): null | ScMapEntry[];
 
-    static scvU63(value: Int64): ScVal;
+    address(value?: ScAddress): ScAddress;
+
+    nonceKey(value?: ScNonceKey): ScNonceKey;
+
+    instance(value?: ScContractInstance): ScContractInstance;
+
+    static scvBool(value: boolean): ScVal;
+
+    static scvVoid(): ScVal;
+
+    static scvError(value: ScError): ScVal;
 
     static scvU32(value: number): ScVal;
 
     static scvI32(value: number): ScVal;
 
-    static scvStatic(value: ScStatic): ScVal;
+    static scvU64(value: Uint64): ScVal;
 
-    static scvObject(value: null | ScObject): ScVal;
+    static scvI64(value: Int64): ScVal;
+
+    static scvTimepoint(value: TimePoint): ScVal;
+
+    static scvDuration(value: Duration): ScVal;
+
+    static scvU128(value: UInt128Parts): ScVal;
+
+    static scvI128(value: Int128Parts): ScVal;
+
+    static scvU256(value: UInt256Parts): ScVal;
+
+    static scvI256(value: Int256Parts): ScVal;
+
+    static scvBytes(value: Buffer): ScVal;
+
+    static scvString(value: string | Buffer): ScVal;
 
     static scvSymbol(value: string | Buffer): ScVal;
 
-    static scvBitset(value: Uint64): ScVal;
+    static scvVec(value: null | ScVal[]): ScVal;
 
-    static scvStatus(value: ScStatus): ScVal;
+    static scvMap(value: null | ScMapEntry[]): ScVal;
+
+    static scvAddress(value: ScAddress): ScVal;
+
+    static scvLedgerKeyContractInstance(): ScVal;
+
+    static scvLedgerKeyNonce(value: ScNonceKey): ScVal;
+
+    static scvContractInstance(value: ScContractInstance): ScVal;
 
     value():
+      | boolean
+      | ScError
+      | number
+      | number
+      | Uint64
       | Int64
-      | number
-      | number
-      | ScStatic
-      | null
-      | ScObject
+      | TimePoint
+      | Duration
+      | UInt128Parts
+      | Int128Parts
+      | UInt256Parts
+      | Int256Parts
+      | Buffer
       | string
       | Buffer
-      | Uint64
-      | ScStatus;
+      | string
+      | Buffer
+      | null
+      | ScVal[]
+      | null
+      | ScMapEntry[]
+      | ScAddress
+      | ScNonceKey
+      | ScContractInstance
+      | void;
 
     toXDR(format?: 'raw'): Buffer;
 
@@ -11442,173 +13093,6 @@ export namespace xdr {
     static fromXDR(input: Buffer, format?: 'raw'): ScVal;
 
     static fromXDR(input: string, format: 'hex' | 'base64'): ScVal;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class ScBigInt {
-    switch(): ScNumSign;
-
-    magnitude(value?: Buffer): Buffer;
-
-    static zero(): ScBigInt;
-
-    static positive(value: Buffer): ScBigInt;
-
-    static negative(value: Buffer): ScBigInt;
-
-    value(): Buffer | void;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ScBigInt;
-
-    static write(value: ScBigInt, io: Buffer): void;
-
-    static isValid(value: ScBigInt): boolean;
-
-    static toXDR(value: ScBigInt): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ScBigInt;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScBigInt;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class ScHash {
-    switch(): ScHashType;
-
-    sha256(value?: Buffer): Buffer;
-
-    static schashSha256(value: Buffer): ScHash;
-
-    value(): Buffer;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ScHash;
-
-    static write(value: ScHash, io: Buffer): void;
-
-    static isValid(value: ScHash): boolean;
-
-    static toXDR(value: ScHash): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ScHash;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScHash;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class ScContractCode {
-    switch(): ScContractCodeType;
-
-    wasm(value?: Buffer): Buffer;
-
-    static sccontractCodeWasm(value: Buffer): ScContractCode;
-
-    static sccontractCodeToken(): ScContractCode;
-
-    value(): Buffer | void;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ScContractCode;
-
-    static write(value: ScContractCode, io: Buffer): void;
-
-    static isValid(value: ScContractCode): boolean;
-
-    static toXDR(value: ScContractCode): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ScContractCode;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScContractCode;
-
-    static validateXDR(input: Buffer, format?: 'raw'): boolean;
-
-    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
-  }
-
-  class ScObject {
-    switch(): ScObjectType;
-
-    vec(value?: ScVal[]): ScVal[];
-
-    map(value?: ScMapEntry[]): ScMapEntry[];
-
-    u64(value?: Uint64): Uint64;
-
-    i64(value?: Int64): Int64;
-
-    bin(value?: Buffer): Buffer;
-
-    bigInt(value?: ScBigInt): ScBigInt;
-
-    hash(value?: ScHash): ScHash;
-
-    publicKey(value?: PublicKey): PublicKey;
-
-    contractCode(value?: ScContractCode): ScContractCode;
-
-    static scoVec(value: ScVal[]): ScObject;
-
-    static scoMap(value: ScMapEntry[]): ScObject;
-
-    static scoU64(value: Uint64): ScObject;
-
-    static scoI64(value: Int64): ScObject;
-
-    static scoBytes(value: Buffer): ScObject;
-
-    static scoBigInt(value: ScBigInt): ScObject;
-
-    static scoHash(value: ScHash): ScObject;
-
-    static scoPublicKey(value: PublicKey): ScObject;
-
-    static scoContractCode(value: ScContractCode): ScObject;
-
-    value():
-      | ScVal[]
-      | ScMapEntry[]
-      | Uint64
-      | Int64
-      | Buffer
-      | ScBigInt
-      | ScHash
-      | PublicKey
-      | ScContractCode;
-
-    toXDR(format?: 'raw'): Buffer;
-
-    toXDR(format: 'hex' | 'base64'): string;
-
-    static read(io: Buffer): ScObject;
-
-    static write(value: ScObject, io: Buffer): void;
-
-    static isValid(value: ScObject): boolean;
-
-    static toXDR(value: ScObject): Buffer;
-
-    static fromXDR(input: Buffer, format?: 'raw'): ScObject;
-
-    static fromXDR(input: string, format: 'hex' | 'base64'): ScObject;
 
     static validateXDR(input: Buffer, format?: 'raw'): boolean;
 
@@ -11656,31 +13140,47 @@ export namespace xdr {
 
     map(value?: ScSpecTypeMap): ScSpecTypeMap;
 
-    set(value?: ScSpecTypeSet): ScSpecTypeSet;
-
     tuple(value?: ScSpecTypeTuple): ScSpecTypeTuple;
+
+    bytesN(value?: ScSpecTypeBytesN): ScSpecTypeBytesN;
 
     udt(value?: ScSpecTypeUdt): ScSpecTypeUdt;
 
-    static scSpecTypeU64(): ScSpecTypeDef;
+    static scSpecTypeVal(): ScSpecTypeDef;
 
-    static scSpecTypeI64(): ScSpecTypeDef;
+    static scSpecTypeBool(): ScSpecTypeDef;
+
+    static scSpecTypeVoid(): ScSpecTypeDef;
+
+    static scSpecTypeError(): ScSpecTypeDef;
 
     static scSpecTypeU32(): ScSpecTypeDef;
 
     static scSpecTypeI32(): ScSpecTypeDef;
 
-    static scSpecTypeBool(): ScSpecTypeDef;
+    static scSpecTypeU64(): ScSpecTypeDef;
 
-    static scSpecTypeSymbol(): ScSpecTypeDef;
+    static scSpecTypeI64(): ScSpecTypeDef;
 
-    static scSpecTypeBitset(): ScSpecTypeDef;
+    static scSpecTypeTimepoint(): ScSpecTypeDef;
 
-    static scSpecTypeStatus(): ScSpecTypeDef;
+    static scSpecTypeDuration(): ScSpecTypeDef;
+
+    static scSpecTypeU128(): ScSpecTypeDef;
+
+    static scSpecTypeI128(): ScSpecTypeDef;
+
+    static scSpecTypeU256(): ScSpecTypeDef;
+
+    static scSpecTypeI256(): ScSpecTypeDef;
 
     static scSpecTypeBytes(): ScSpecTypeDef;
 
-    static scSpecTypeBigInt(): ScSpecTypeDef;
+    static scSpecTypeString(): ScSpecTypeDef;
+
+    static scSpecTypeSymbol(): ScSpecTypeDef;
+
+    static scSpecTypeAddress(): ScSpecTypeDef;
 
     static scSpecTypeOption(value: ScSpecTypeOption): ScSpecTypeDef;
 
@@ -11690,9 +13190,9 @@ export namespace xdr {
 
     static scSpecTypeMap(value: ScSpecTypeMap): ScSpecTypeDef;
 
-    static scSpecTypeSet(value: ScSpecTypeSet): ScSpecTypeDef;
-
     static scSpecTypeTuple(value: ScSpecTypeTuple): ScSpecTypeDef;
+
+    static scSpecTypeBytesN(value: ScSpecTypeBytesN): ScSpecTypeDef;
 
     static scSpecTypeUdt(value: ScSpecTypeUdt): ScSpecTypeDef;
 
@@ -11701,8 +13201,8 @@ export namespace xdr {
       | ScSpecTypeResult
       | ScSpecTypeVec
       | ScSpecTypeMap
-      | ScSpecTypeSet
       | ScSpecTypeTuple
+      | ScSpecTypeBytesN
       | ScSpecTypeUdt
       | void;
 
@@ -11727,6 +13227,47 @@ export namespace xdr {
     static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
   }
 
+  class ScSpecUdtUnionCaseV0 {
+    switch(): ScSpecUdtUnionCaseV0Kind;
+
+    voidCase(value?: ScSpecUdtUnionCaseVoidV0): ScSpecUdtUnionCaseVoidV0;
+
+    tupleCase(value?: ScSpecUdtUnionCaseTupleV0): ScSpecUdtUnionCaseTupleV0;
+
+    static scSpecUdtUnionCaseVoidV0(
+      value: ScSpecUdtUnionCaseVoidV0
+    ): ScSpecUdtUnionCaseV0;
+
+    static scSpecUdtUnionCaseTupleV0(
+      value: ScSpecUdtUnionCaseTupleV0
+    ): ScSpecUdtUnionCaseV0;
+
+    value(): ScSpecUdtUnionCaseVoidV0 | ScSpecUdtUnionCaseTupleV0;
+
+    toXDR(format?: 'raw'): Buffer;
+
+    toXDR(format: 'hex' | 'base64'): string;
+
+    static read(io: Buffer): ScSpecUdtUnionCaseV0;
+
+    static write(value: ScSpecUdtUnionCaseV0, io: Buffer): void;
+
+    static isValid(value: ScSpecUdtUnionCaseV0): boolean;
+
+    static toXDR(value: ScSpecUdtUnionCaseV0): Buffer;
+
+    static fromXDR(input: Buffer, format?: 'raw'): ScSpecUdtUnionCaseV0;
+
+    static fromXDR(
+      input: string,
+      format: 'hex' | 'base64'
+    ): ScSpecUdtUnionCaseV0;
+
+    static validateXDR(input: Buffer, format?: 'raw'): boolean;
+
+    static validateXDR(input: string, format: 'hex' | 'base64'): boolean;
+  }
+
   class ScSpecEntry {
     switch(): ScSpecEntryKind;
 
@@ -11736,13 +13277,26 @@ export namespace xdr {
 
     udtUnionV0(value?: ScSpecUdtUnionV0): ScSpecUdtUnionV0;
 
+    udtEnumV0(value?: ScSpecUdtEnumV0): ScSpecUdtEnumV0;
+
+    udtErrorEnumV0(value?: ScSpecUdtErrorEnumV0): ScSpecUdtErrorEnumV0;
+
     static scSpecEntryFunctionV0(value: ScSpecFunctionV0): ScSpecEntry;
 
     static scSpecEntryUdtStructV0(value: ScSpecUdtStructV0): ScSpecEntry;
 
     static scSpecEntryUdtUnionV0(value: ScSpecUdtUnionV0): ScSpecEntry;
 
-    value(): ScSpecFunctionV0 | ScSpecUdtStructV0 | ScSpecUdtUnionV0;
+    static scSpecEntryUdtEnumV0(value: ScSpecUdtEnumV0): ScSpecEntry;
+
+    static scSpecEntryUdtErrorEnumV0(value: ScSpecUdtErrorEnumV0): ScSpecEntry;
+
+    value():
+      | ScSpecFunctionV0
+      | ScSpecUdtStructV0
+      | ScSpecUdtUnionV0
+      | ScSpecUdtEnumV0
+      | ScSpecUdtErrorEnumV0;
 
     toXDR(format?: 'raw'): Buffer;
 

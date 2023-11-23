@@ -10,7 +10,7 @@
     "types": [],
     "noEmit": true,
     "forceConsistentCasingInFileNames": true,
-    "paths": { "stellar-base": ["../"] }
+    "paths": { "js-kinesis-base": ["../"] }
   },
   "files": ["index.d.ts", "test.ts"]
 }

@@ -2,7 +2,7 @@ describe('TransactionEnvelope', function() {
   it('can successfully decode an envelope', function(done) {
     // from https://github.com/stellar/js-stellar-sdk/issues/73
     let xdr =
-      'AAAAAPQQv+uPYrlCDnjgPyPRgIjB6T8Zb8ANmL8YGAXC2IAgAAAAZAAIteYAAAAHAAAAAAAAAAAAAAABAAAAAAAAAAMAAAAAAAAAAUVVUgAAAAAAUtYuFczBLlsXyEp3q8BbTBpEGINWahqkFbnTPd93YUUAAAAXSHboAAAAABEAACcQAAAAAAAAAKIAAAAAAAAAAcLYgCAAAABAo2tU6n0Bb7bbbpaXacVeaTVbxNMBtnrrXVk2QAOje2Flllk/ORlmQdFU/9c8z43eWh1RNMpI3PscY+yDCnJPBQ==';
+      'AAAAAEtl2k+Vx6bLH0iiP9boT+j4e7m/uApHLEaX9zulHmVBAAAAAB2BGiQAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAEahxdpkSFx+yLaWqZI2+YaIsdmw4ruszEbDYiccAQ20AAAAAEGQqwAAAAAAAAAAAaUeZUEAAABAVrCFJvyzHb+YicyrvIo0axh61qaXapPTQxmraykhg8APE3TVTQyS+t8SR0LF2CfDKjLk4Xl2GRhIztXZlEYqBw==';
 
     let txe = StellarBase.xdr.TransactionEnvelope.fromXDR(
       xdr,
@@ -15,12 +15,12 @@ describe('TransactionEnvelope', function() {
   });
 
   it('calculates correct hash with non-utf8 strings', function(done) {
-    // a84d534b3742ad89413bdbf259e02fa4c5d039123769e9bcc63616f723a2bcd5
+    // ef1607183c06e41dd3291de61fd562dc6f342a73d3fe4fabf5229937fea1a065
     let xdr =
-      'AAAAAAtjwtJadppTmm0NtAU99BFxXXfzPO1N/SqR43Z8aXqXAAAAZAAIj6YAAAACAAAAAAAAAAEAAAAB0QAAAAAAAAEAAAAAAAAAAQAAAADLa6390PDAqg3qDLpshQxS+uVw3ytSgKRirQcInPWt1QAAAAAAAAAAA1Z+AAAAAAAAAAABfGl6lwAAAEBC655+8Izq54MIZrXTVF/E1ycHgQWpVcBD+LFkuOjjJd995u/7wM8sFqQqambL0/ME2FTOtxMO65B9i3eAIu4P';
+      'AAAAAEtl2k+Vx6bLH0iiP9boT+j4e7m/uApHLEaX9zulHmVBAAAAAB2BGiQAAAAAAAAAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAEahxdpkSFx+yLaWqZI2+YaIsdmw4ruszEbDYiccAQ20AAAAAEGQqwAAAAAAAAAAAaUeZUEAAABAVrCFJvyzHb+YicyrvIo0axh61qaXapPTQxmraykhg8APE3TVTQyS+t8SR0LF2CfDKjLk4Xl2GRhIztXZlEYqBw==';
     var tx = new StellarBase.Transaction(xdr, StellarBase.Networks.PUBLIC);
     expect(tx.hash().toString('hex')).to.be.equal(
-      'a84d534b3742ad89413bdbf259e02fa4c5d039123769e9bcc63616f723a2bcd5'
+      'ef1607183c06e41dd3291de61fd562dc6f342a73d3fe4fabf5229937fea1a065'
     );
     done();
   });

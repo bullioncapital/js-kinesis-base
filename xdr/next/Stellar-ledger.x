@@ -47,17 +47,13 @@ struct StellarValue
     ext;
 };
 
-const MASK_LEDGER_HEADER_FLAGS = 0x7F;
+const MASK_LEDGER_HEADER_FLAGS = 0x7;
 
 enum LedgerHeaderFlags
 {
     DISABLE_LIQUIDITY_POOL_TRADING_FLAG = 0x1,
     DISABLE_LIQUIDITY_POOL_DEPOSIT_FLAG = 0x2,
-    DISABLE_LIQUIDITY_POOL_WITHDRAWAL_FLAG = 0x4,
-    DISABLE_CONTRACT_CREATE = 0x8,
-    DISABLE_CONTRACT_UPDATE = 0x10,
-    DISABLE_CONTRACT_REMOVE = 0x20,
-    DISABLE_CONTRACT_INVOKE = 0x40
+    DISABLE_LIQUIDITY_POOL_WITHDRAWAL_FLAG = 0x4
 };
 
 struct LedgerHeaderExtensionV1
@@ -127,7 +123,13 @@ enum LedgerUpgradeType
     LEDGER_UPGRADE_MAX_TX_SET_SIZE = 3,
     LEDGER_UPGRADE_BASE_RESERVE = 4,
     LEDGER_UPGRADE_FLAGS = 5,
-    LEDGER_UPGRADE_CONFIG = 6
+    LEDGER_UPGRADE_CONFIG = 6,
+    LEDGER_UPGRADE_MAX_SOROBAN_TX_SET_SIZE = 7
+};
+
+struct ConfigUpgradeSetKey {
+    Hash contractID;
+    Hash contentHash;
 };
 
 union LedgerUpgrade switch (LedgerUpgradeType type)
@@ -143,11 +145,16 @@ case LEDGER_UPGRADE_BASE_RESERVE:
 case LEDGER_UPGRADE_FLAGS:
     uint32 newFlags; // update flags
 case LEDGER_UPGRADE_CONFIG:
-    struct
-    {
-        ConfigSettingID id; // id to update
-        ConfigSetting setting; // new value
-    } configSetting;
+    // Update arbitrary `ConfigSetting` entries identified by the key.
+    ConfigUpgradeSetKey newConfig;
+case LEDGER_UPGRADE_MAX_SOROBAN_TX_SET_SIZE:
+    // Update ConfigSettingContractExecutionLanesV0.ledgerMaxTxCount without
+    // using `LEDGER_UPGRADE_CONFIG`.
+    uint32 newMaxSorobanTxSetSize;
+};
+
+struct ConfigUpgradeSet {
+    ConfigSettingEntry updatedEntry<>;
 };
 
 /* Entries used to define the bucket list */
@@ -359,6 +366,74 @@ struct TransactionMetaV2
                                         // applied if any
 };
 
+enum ContractEventType
+{
+    SYSTEM = 0,
+    CONTRACT = 1,
+    DIAGNOSTIC = 2
+};
+
+struct ContractEvent
+{
+    // We can use this to add more fields, or because it
+    // is first, to change ContractEvent into a union.
+    ExtensionPoint ext;
+
+    Hash* contractID;
+    ContractEventType type;
+
+    union switch (int v)
+    {
+    case 0:
+        struct
+        {
+            SCVal topics<>;
+            SCVal data;
+        } v0;
+    }
+    body;
+};
+
+struct DiagnosticEvent
+{
+    bool inSuccessfulContractCall;
+    ContractEvent event;
+};
+
+struct SorobanTransactionMeta 
+{
+    ExtensionPoint ext;
+
+    ContractEvent events<>;             // custom events populated by the
+                                        // contracts themselves.
+    SCVal returnValue;                  // return value of the host fn invocation
+
+    // Diagnostics events that are not hashed.
+    // This will contain all contract and diagnostic events. Even ones
+    // that were emitted in a failed contract call.
+    DiagnosticEvent diagnosticEvents<>;
+};
+
+struct TransactionMetaV3
+{
+    ExtensionPoint ext;
+
+    LedgerEntryChanges txChangesBefore;  // tx level changes before operations
+                                         // are applied if any
+    OperationMeta operations<>;          // meta for each operation
+    LedgerEntryChanges txChangesAfter;   // tx level changes after operations are
+                                         // applied if any
+    SorobanTransactionMeta* sorobanMeta; // Soroban-specific meta (only for 
+                                         // Soroban transactions).
+};
+
+// This is in Stellar-ledger.x to due to a circular dependency 
+struct InvokeHostFunctionSuccessPreImage
+{
+    SCVal returnValue;
+    ContractEvent events<>;
+};
+
 // this is the meta produced when applying transactions
 // it does not include pre-apply updates such as fees
 union TransactionMeta switch (int v)
@@ -369,6 +444,8 @@ case 1:
     TransactionMetaV1 v1;
 case 2:
     TransactionMetaV2 v2;
+case 3:
+    TransactionMetaV3 v3;
 };
 
 // This struct groups together changes on a per transaction basis
@@ -409,6 +486,10 @@ struct LedgerCloseMetaV0
 
 struct LedgerCloseMetaV1
 {
+    // We forgot to add an ExtensionPoint in v0 but at least
+    // we can add one now in v1.
+    ExtensionPoint ext;
+
     LedgerHeaderHistoryEntry ledgerHeader;
 
     GeneralizedTransactionSet txSet;
@@ -423,6 +504,17 @@ struct LedgerCloseMetaV1
 
     // other misc information attached to the ledger close
     SCPHistoryEntry scpInfo<>;
+
+    // Size in bytes of BucketList, to support downstream
+    // systems calculating storage fees correctly.
+    uint64 totalByteSizeOfBucketList;
+
+    // Temp keys that are being evicted at this ledger.
+    LedgerKey evictedTemporaryLedgerKeys<>;
+
+    // Archived restorable ledger entries that are being
+    // evicted at this ledger.
+    LedgerEntry evictedPersistentLedgerEntries<>;
 };
 
 union LedgerCloseMeta switch (int v)

@@ -4,17 +4,15 @@
 
 %#include "xdr/Stellar-types.h"
 %#include "xdr/Stellar-contract.h"
+%#include "xdr/Stellar-contract-config-setting.h"
 
 namespace stellar
 {
 
-typedef PublicKey AccountID;
 typedef opaque Thresholds[4];
 typedef string string32<32>;
 typedef string string64<64>;
 typedef int64 SequenceNumber;
-typedef uint64 TimePoint;
-typedef uint64 Duration;
 typedef opaque DataValue<64>;
 typedef Hash PoolID; // SHA256(LiquidityPoolParameters)
 
@@ -101,7 +99,9 @@ enum LedgerEntryType
     CLAIMABLE_BALANCE = 4,
     LIQUIDITY_POOL = 5,
     CONTRACT_DATA = 6,
-    CONFIG_SETTING = 7
+    CONTRACT_CODE = 7,
+    CONFIG_SETTING = 8,
+    TTL = 9
 };
 
 struct Signer
@@ -494,39 +494,31 @@ struct LiquidityPoolEntry
     body;
 };
 
+enum ContractDataDurability {
+    TEMPORARY = 0,
+    PERSISTENT = 1
+};
+
 struct ContractDataEntry {
-    Hash contractID;
+    ExtensionPoint ext;
+
+    SCAddress contract;
     SCVal key;
+    ContractDataDurability durability;
     SCVal val;
 };
 
-enum ConfigSettingType
-{
-    CONFIG_SETTING_TYPE_UINT32 = 0
+struct ContractCodeEntry {
+    ExtensionPoint ext;
+
+    Hash hash;
+    opaque code<>;
 };
 
-union ConfigSetting switch (ConfigSettingType type)
-{
-case CONFIG_SETTING_TYPE_UINT32:
-    uint32 uint32Val;
-};
-
-enum ConfigSettingID
-{
-    CONFIG_SETTING_CONTRACT_MAX_SIZE = 0
-};
-
-struct ConfigSettingEntry
-{
-    union switch (int v)
-    {
-    case 0:
-        void;
-    }
-    ext;
-
-    ConfigSettingID configSettingID;
-    ConfigSetting setting;
+struct TTLEntry {
+    // Hash of the LedgerKey that is associated with this TTLEntry
+    Hash keyHash;
+    uint32 liveUntilLedgerSeq;
 };
 
 struct LedgerEntryExtensionV1
@@ -561,8 +553,12 @@ struct LedgerEntry
         LiquidityPoolEntry liquidityPool;
     case CONTRACT_DATA:
         ContractDataEntry contractData;
+    case CONTRACT_CODE:
+        ContractCodeEntry contractCode;
     case CONFIG_SETTING:
         ConfigSettingEntry configSetting;
+    case TTL:
+        TTLEntry ttl;
     }
     data;
 
@@ -620,14 +616,26 @@ case LIQUIDITY_POOL:
 case CONTRACT_DATA:
     struct
     {
-        Hash contractID;
+        SCAddress contract;
         SCVal key;
+        ContractDataDurability durability;
     } contractData;
+case CONTRACT_CODE:
+    struct
+    {
+        Hash hash;
+    } contractCode;
 case CONFIG_SETTING:
     struct
     {
         ConfigSettingID configSettingID;
     } configSetting;
+case TTL:
+    struct
+    {
+        // Hash of the LedgerKey that is associated with this TTLEntry
+        Hash keyHash;
+    } ttl;
 };
 
 // list of all envelope types used in the application
@@ -643,7 +651,7 @@ enum EnvelopeType
     ENVELOPE_TYPE_TX_FEE_BUMP = 5,
     ENVELOPE_TYPE_OP_ID = 6,
     ENVELOPE_TYPE_POOL_REVOKE_OP_ID = 7,
-    ENVELOPE_TYPE_CONTRACT_ID_FROM_ED25519 = 8,
-    ENVELOPE_TYPE_CONTRACT_ID_FROM_CONTRACT = 9
+    ENVELOPE_TYPE_CONTRACT_ID = 8,
+    ENVELOPE_TYPE_SOROBAN_AUTHORIZATION = 9
 };
 }
