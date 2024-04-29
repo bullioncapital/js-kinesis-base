@@ -1,7 +1,10 @@
+.nvmrc
+.nyc_output/
 /node_modules/
 /tmp/
-/lib/
 /dist/
+/config/dist/
+/lib/
 /coverage/
 /jsdoc/
 .DS_Store

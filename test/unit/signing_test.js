@@ -32,22 +32,22 @@ describe('StellarBase#verify', function() {
 
   it("can verify an string properly", function() {
     let data = "hello world";
-    expect(StellarBase.verify(data, sig, publicKey)).to.be.truthy;
-    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.falsey;
-    expect(StellarBase.verify(data, badSig, publicKey)).to.be.falsey;
+    expect(StellarBase.verify(data, sig, publicKey)).to.be.ok;
+    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.not.ok;
+    expect(StellarBase.verify(data, badSig, publicKey)).to.be.not.ok;
   });
 
   it("can verify an buffer properly", function() {
     let data        = Buffer.from("hello world", 'utf8');
-    expect(StellarBase.verify(data, sig, publicKey)).to.be.truthy;
-    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.falsey;
-    expect(StellarBase.verify(data, badSig, publicKey)).to.be.falsey;
+    expect(StellarBase.verify(data, sig, publicKey)).to.be.ok;
+    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.not.ok;
+    expect(StellarBase.verify(data, badSig, publicKey)).to.be.not.ok;
   });
 
   it("can verify an array of bytes properly", function() {
     let data        = [ 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 ];
-    expect(StellarBase.verify(data, sig, publicKey)).to.be.truthy;
-    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.falsey;
-    expect(StellarBase.verify(data, badSig, publicKey)).to.be.falsey;
+    expect(StellarBase.verify(data, sig, publicKey)).to.be.ok;
+    expect(StellarBase.verify("corrupted", sig, publicKey)).to.be.not.ok;
+    expect(StellarBase.verify(data, badSig, publicKey)).to.be.not.ok;
   });
 });

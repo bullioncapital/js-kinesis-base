@@ -3,6 +3,10 @@
   "version": "7.0.0-beta.1",
   "description": "Low level stellar support library",
   "main": "./lib/index.js",
+  "browser": {
+    "main": "./dist/stellar-base.min.js",
+    "sodium-native": false
+  },
   "types": "./types/index.d.ts",
   "scripts": {
     "build": "yarn build:node && yarn build:browser",
@@ -14,7 +18,6 @@
     "test": "yarn build && yarn test:node && yarn test:browser",
     "test:node": "yarn _nyc mocha",
     "test:browser": "karma start ./config/karma.conf.js",
-    "xdr": "bundle exec xdrgen -o src/generated -l javascript -n stellar-xdr xdr/Stellar-ledger-entries.x xdr/Stellar-ledger.x xdr/Stellar-overlay.x xdr/Stellar-SCP.x xdr/Stellar-transaction.x xdr/Stellar-types.x",
     "docs": "jsdoc -c ./config/.jsdoc.json --verbose",
     "lint": "eslint -c ./config/.eslintrc.js src/ && dtslint --localTs node_modules/typescript/lib types/",
     "preversion": "yarn clean && yarn fmt && yarn lint && yarn build:prod && yarn test",
@@ -23,14 +26,23 @@
     "clean": "rm -rf lib/ dist/ coverage/ .nyc_output/",
     "_nyc": "nyc --nycrc-path ./config/.nycrc"
   },
+  "mocha": {
+    "require": [
+      "@babel/register",
+      "./test/test-helper.js"
+    ],
+    "reporter": "dot",
+    "recursive": true,
+    "timeout": 5000
+  },
   "nyc": {
     "sourceMap": false,
     "instrument": false,
     "reporter": "text-summary"
   },
   "files": [
-    "/lib/**/*.js",
     "/dist/*.js",
+    "/lib/**/*.js",
     "/types/*.d.ts"
   ],
   "husky": {
@@ -43,9 +55,6 @@
       "yarn fmt",
       "yarn lint"
     ]
-  },
-  "browser": {
-    "sodium-native": false
   },
   "repository": {
     "type": "git",
@@ -61,67 +70,64 @@
   },
   "homepage": "https://github.com/bullioncapital/js-kinesis-base",
   "devDependencies": {
-    "@babel/cli": "^7.21.5",
-    "@babel/core": "^7.21.8",
-    "@babel/eslint-parser": "^7.21.8",
-    "@babel/eslint-plugin": "^7.19.1",
-    "@babel/preset-env": "^7.21.5",
-    "@babel/register": "^7.21.0",
-    "@definitelytyped/dtslint": "^0.0.159",
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.7",
+    "@babel/eslint-parser": "^7.23.3",
+    "@babel/eslint-plugin": "^7.23.5",
+    "@babel/preset-env": "^7.23.8",
+    "@babel/register": "^7.23.7",
+    "@definitelytyped/dtslint": "^0.0.182",
     "@istanbuljs/nyc-config-babel": "3.0.0",
-    "@types/node": "^20.1.1",
-    "@typescript-eslint/parser": "^5.59.5",
-    "babel-loader": "^9.1.2",
+    "@types/node": "^20.11.5",
+    "@typescript-eslint/parser": "^6.19.1",
+    "babel-loader": "^9.1.3",
     "babel-plugin-istanbul": "^6.1.1",
-    "chai": "^4.3.7",
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
     "cross-env": "^7.0.3",
-    "eslint": "^8.40.0",
+    "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.25.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prefer-import": "^0.0.1",
-    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-prettier": "^5.1.3",
     "eslint-webpack-plugin": "^4.0.0",
     "ghooks": "^2.0.4",
     "husky": "^8.0.3",
     "jsdoc": "^4.0.2",
     "karma": "^6.4.2",
     "karma-chrome-launcher": "^3.1.0",
-    "karma-coverage": "^2.2.0",
+    "karma-coverage": "^2.2.1",
     "karma-firefox-launcher": "^2.1.1",
     "karma-mocha": "^2.0.0",
     "karma-sinon-chai": "^2.0.2",
     "karma-webpack": "^5.0.0",
-    "lint-staged": "^13.2.2",
+    "lint-staged": "^15.2.0",
     "minami": "^1.1.1",
     "mocha": "^10.2.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "nyc": "^15.1.0",
-    "prettier": "^2.8.8",
+    "prettier": "^3.2.4",
     "randombytes": "^2.1.0",
-    "sinon": "^15.0.3",
+    "sinon": "^16.1.0",
     "sinon-chai": "^3.7.0",
     "taffydb": "^2.7.3",
-    "terser-webpack-plugin": "^5.3.8",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.0.3",
-    "webpack": "^5.82.0",
-    "webpack-cli": "^5.1.0"
+    "terser-webpack-plugin": "^5.3.10",
+    "ts-node": "^10.9.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.1"
   },
   "dependencies": {
+    "@stellar/js-xdr": "^3.1.1",
     "base32.js": "^0.1.0",
     "bignumber.js": "^9.1.2",
     "crc": "^3.5.0",
-    "@stellar/js-xdr": "^3.1.1",
     "lodash": "^4.17.21",
     "sha.js": "^2.3.6",
     "tweetnacl": "^1.0.0"
   },
   "optionalDependencies": {
     "sodium-native": "^4.1.1"
-  },
-  "resolutions": {
-    "**/ua-parser-js": "0.7.28"
   }
 }
