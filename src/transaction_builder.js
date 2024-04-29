@@ -1,4 +1,4 @@
-import { UnsignedHyper } from 'js-xdr';
+import { UnsignedHyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
 import clone from 'lodash/clone';
 import isUndefined from 'lodash/isUndefined';
@@ -207,7 +207,7 @@ export class TransactionBuilder {
   }
 
   _buildV0Tx() {
-    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).add(1);
+    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).plus(1);
     const fee = new BigNumber(this.baseFee).toNumber();
     const attrs = {
       sourceAccountEd25519: Keypair.fromPublicKey(this.source.accountId())
@@ -243,7 +243,7 @@ export class TransactionBuilder {
   }
 
   _buildV1Tx() {
-    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).add(1);
+    const sequenceNumber = new BigNumber(this.source.sequenceNumber()).plus(1);
     const fee = new BigNumber(this.baseFee).toNumber();
     const attrs = {
       fee: UnsignedHyper.fromString(fee.toString()),

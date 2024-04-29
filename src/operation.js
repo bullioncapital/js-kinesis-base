@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
 
-import { Hyper } from 'js-xdr';
+import { Hyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
 import trimEnd from 'lodash/trimEnd';
 import isUndefined from 'lodash/isUndefined';
@@ -404,7 +404,7 @@ export class Operation {
       // < 0
       amount.isNegative() ||
       // > Max value
-      amount.times(ONE).greaterThan(new BigNumber(MAX_INT64).toString()) ||
+      amount.times(ONE).isGreaterThan(new BigNumber(MAX_INT64).toString()) ||
       // Decimal places (max 7)
       amount.decimalPlaces() > 7 ||
       // NaN or Infinity
@@ -458,7 +458,7 @@ export class Operation {
    * @returns {Hyper} XDR amount
    */
   static _toXDRAmount(value) {
-    const amount = new BigNumber(value).mul(ONE);
+    const amount = new BigNumber(value).times(ONE);
     return Hyper.fromString(amount.toString());
   }
 

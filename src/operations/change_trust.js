@@ -1,5 +1,5 @@
 import isUndefined from 'lodash/isUndefined';
-import { Hyper } from 'js-xdr';
+import { Hyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
 import xdr from '../generated/stellar-xdr_generated';
 import { Asset } from '../asset';

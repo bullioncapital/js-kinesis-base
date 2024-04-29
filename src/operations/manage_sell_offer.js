@@ -1,5 +1,5 @@
 import isUndefined from 'lodash/isUndefined';
-import { Hyper } from 'js-xdr';
+import { Hyper } from '@stellar/js-xdr';
 import xdr from '../generated/stellar-xdr_generated';
 /**
  * Returns a XDR ManageSellOfferOp. A "manage sell offer" operation creates, updates, or
