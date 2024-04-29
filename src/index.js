@@ -1,3 +1,4 @@
+/* eslint-disable import/no-import-module-exports */
 import xdr from './generated/stellar-xdr_generated';
 
 export { xdr };
