@@ -7,31 +7,36 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
+      max-parallel: 4
       matrix:
-        node-version: [12.x, 13.x, 14.x]
-    
+        node-version: [18, 20, 21]
+
     steps:
-    - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install Dependencies
-      run: yarn install
+      # Workaround for some `yarn` nonsense, see:
+      # https://github.com/yarnpkg/yarn/issues/6312#issuecomment-429685210
+      - name: Install Dependencies
+        run: yarn install --network-concurrency 1
 
-    - name: Build
-      run: gulp
+      - name: Build All
+        run: yarn build:prod
 
-    - name: Run Node Tests
-      run: yarn test
+      - name: Run Node Tests
+        run: yarn test:node
 
-    - name: Run Browser Tests
-      run: gulp test:browser
+      - name: Run Browser Tests
+        run: yarn test:browser
 
-    - name: Run Linter
-      run: yarn dtslint
+      - name: Run Linter Checks
+        run: yarn fmt && yarn lint && (git diff-index --quiet HEAD; git diff)
