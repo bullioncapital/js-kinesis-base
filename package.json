@@ -125,7 +125,8 @@
     "crc": "^3.5.0",
     "lodash": "^4.17.21",
     "sha.js": "^2.3.6",
-    "tweetnacl": "^1.0.0"
+    "tweetnacl": "^1.0.0",
+    "typescript": "5.3.3"
   },
   "optionalDependencies": {
     "sodium-native": "^4.1.1"
