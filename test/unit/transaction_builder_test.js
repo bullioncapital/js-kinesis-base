@@ -1,15 +1,15 @@
 import { isValidDate } from '../../src/transaction_builder.js';
 import { encodeMuxedAccountToAddress } from '../../src/util/decode_encode_muxed_account.js';
 
-describe('TransactionBuilder', function() {
-  describe('constructs v0 transaction', function() {
+describe('TransactionBuilder', function () {
+  describe('constructs v0 transaction', function () {
     var source;
     var destination;
     var amount;
     var asset;
     var transaction;
     var memo;
-    beforeEach(function() {
+    beforeEach(function () {
       source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -36,48 +36,48 @@ describe('TransactionBuilder', function() {
         .build();
     });
 
-    it('should generate transaction envelop V0', function(done) {
+    it('should generate transaction envelop V0', function (done) {
       expect(transaction.toEnvelope().switch().name).to.be.equal(
         'envelopeTypeTxV0'
       );
       done();
     });
 
-    it('should have the same source account', function(done) {
+    it('should have the same source account', function (done) {
       expect(transaction.source).to.be.equal(source.accountId());
       done();
     });
 
-    it('should have the incremented sequence number', function(done) {
+    it('should have the incremented sequence number', function (done) {
       expect(transaction.sequence).to.be.equal('1');
       done();
     });
 
-    it("should increment the account's sequence number", function(done) {
+    it("should increment the account's sequence number", function (done) {
       expect(source.sequenceNumber()).to.be.equal('1');
       done();
     });
 
-    it('should have one payment operation', function(done) {
+    it('should have one payment operation', function (done) {
       expect(transaction.operations.length).to.be.equal(1);
       expect(transaction.operations[0].type).to.be.equal('payment');
       done();
     });
 
-    it('should have 100 stroops fee', function(done) {
+    it('should have 100 stroops fee', function (done) {
       expect(transaction.fee).to.be.equal('100');
       done();
     });
   });
 
-  describe('constructs a native payment transaction with one operation', function() {
+  describe('constructs a native payment transaction with one operation', function () {
     var source;
     var destination;
     var amount;
     var asset;
     var transaction;
     var memo;
-    beforeEach(function() {
+    beforeEach(function () {
       source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -104,34 +104,34 @@ describe('TransactionBuilder', function() {
       // console.log(`transactionHash: ${transaction.toXDR()}`);
     });
 
-    it('should have the same source account', function(done) {
+    it('should have the same source account', function (done) {
       expect(transaction.source).to.be.equal(source.accountId());
       done();
     });
 
-    it('should have the incremented sequence number', function(done) {
+    it('should have the incremented sequence number', function (done) {
       expect(transaction.sequence).to.be.equal('1');
       done();
     });
 
-    it("should increment the account's sequence number", function(done) {
+    it("should increment the account's sequence number", function (done) {
       expect(source.sequenceNumber()).to.be.equal('1');
       done();
     });
 
-    it('should have one payment operation', function(done) {
+    it('should have one payment operation', function (done) {
       expect(transaction.operations.length).to.be.equal(1);
       expect(transaction.operations[0].type).to.be.equal('payment');
       done();
     });
 
-    it('should have 100 stroops fee', function(done) {
+    it('should have 100 stroops fee', function (done) {
       expect(transaction.fee).to.be.equal('100');
       done();
     });
   });
 
-  describe('constructs a native payment transaction with two operations', function() {
+  describe('constructs a native payment transaction with two operations', function () {
     var source;
     var destination1;
     var amount1;
@@ -139,7 +139,7 @@ describe('TransactionBuilder', function() {
     var amount2;
     var asset;
     var transaction;
-    beforeEach(function() {
+    beforeEach(function () {
       asset = StellarBase.Asset.native();
       source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
@@ -173,22 +173,22 @@ describe('TransactionBuilder', function() {
         .build();
     });
 
-    it('should have the same source account', function(done) {
+    it('should have the same source account', function (done) {
       expect(transaction.source).to.be.equal(source.accountId());
       done();
     });
 
-    it('should have the incremented sequence number', function(done) {
+    it('should have the incremented sequence number', function (done) {
       expect(transaction.sequence).to.be.equal('1');
       done();
     });
 
-    it("should increment the account's sequence number", function(done) {
+    it("should increment the account's sequence number", function (done) {
       expect(source.sequenceNumber()).to.be.equal('1');
       done();
     });
 
-    it('should have two payment operation', function(done) {
+    it('should have two payment operation', function (done) {
       expect(transaction.operations.length).to.be.equal(2);
       expect(transaction.operations[0].type).to.be.equal('payment');
       expect(transaction.operations[1].type).to.be.equal('payment');
@@ -196,13 +196,13 @@ describe('TransactionBuilder', function() {
     });
 
     // let client control the fee
-    xit('should have 200 stroops fee', function(done) {
+    xit('should have 200 stroops fee', function (done) {
       expect(transaction.fee).to.be.equal('200');
       done();
     });
   });
 
-  describe('constructs a native payment transaction with custom base fee', function() {
+  describe('constructs a native payment transaction with custom base fee', function () {
     var source;
     var destination1;
     var amount1;
@@ -210,7 +210,7 @@ describe('TransactionBuilder', function() {
     var amount2;
     var asset;
     var transaction;
-    beforeEach(function() {
+    beforeEach(function () {
       asset = StellarBase.Asset.native();
       source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
@@ -245,14 +245,14 @@ describe('TransactionBuilder', function() {
     });
 
     // let client control the fee
-    xit('should have 2000 stroops fee', function(done) {
+    xit('should have 2000 stroops fee', function (done) {
       expect(transaction.fee).to.be.equal('2000');
       done();
     });
   });
 
-  describe('constructs a native payment transaction with integer timebounds', function() {
-    it('should have have timebounds', function(done) {
+  describe('constructs a native payment transaction with integer timebounds', function () {
+    it('should have have timebounds', function (done) {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -282,31 +282,31 @@ describe('TransactionBuilder', function() {
     });
   });
 
-  describe('distinguishes whether a provided Date is valid or invalid', function() {
-    it('should accept empty Date objects', function(done) {
+  describe('distinguishes whether a provided Date is valid or invalid', function () {
+    it('should accept empty Date objects', function (done) {
       let d = new Date();
       expect(isValidDate(d)).to.be.true;
       done();
     });
-    it('should accept configured Date objects', function(done) {
+    it('should accept configured Date objects', function (done) {
       let d = new Date(1455287522000);
       expect(isValidDate(d)).to.be.true;
       done();
     });
-    it('should reject mis-configured Date objects', function(done) {
+    it('should reject mis-configured Date objects', function (done) {
       let d = new Date('bad string here');
       expect(isValidDate(d)).to.be.false;
       done();
     });
-    it('should reject objects that are not Dates', function(done) {
+    it('should reject objects that are not Dates', function (done) {
       let d = [1455287522000];
       expect(isValidDate(d)).to.be.false;
       done();
     });
   });
 
-  describe('constructs a native payment transaction with date timebounds', function() {
-    it('should have expected timebounds', function(done) {
+  describe('constructs a native payment transaction with date timebounds', function () {
+    it('should have expected timebounds', function (done) {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -343,8 +343,8 @@ describe('TransactionBuilder', function() {
       done();
     });
   });
-  describe('timebounds', function() {
-    it('requires maxTime', function() {
+  describe('timebounds', function () {
+    it('requires maxTime', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -360,7 +360,7 @@ describe('TransactionBuilder', function() {
         'TimeBounds has to be set or you must call setTimeout(TimeoutInfinite).'
       );
     });
-    it('requires minTime', function() {
+    it('requires minTime', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -376,7 +376,7 @@ describe('TransactionBuilder', function() {
         'TimeBounds has to be set or you must call setTimeout(TimeoutInfinite).'
       );
     });
-    it('works with timebounds defined', function() {
+    it('works with timebounds defined', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -392,7 +392,7 @@ describe('TransactionBuilder', function() {
         }).build();
       }).to.not.throw();
     });
-    it('fails with empty timebounds', function() {
+    it('fails with empty timebounds', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -407,8 +407,8 @@ describe('TransactionBuilder', function() {
       );
     });
   });
-  describe('setTimeout', function() {
-    it('not called', function() {
+  describe('setTimeout', function () {
+    it('not called', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -430,7 +430,7 @@ describe('TransactionBuilder', function() {
       expect(source.sequenceNumber()).to.be.equal('0');
     });
 
-    it('timeout negative', function() {
+    it('timeout negative', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -452,7 +452,7 @@ describe('TransactionBuilder', function() {
       expect(source.sequenceNumber()).to.be.equal('0');
     });
 
-    it('sets timebounds', function() {
+    it('sets timebounds', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -478,7 +478,7 @@ describe('TransactionBuilder', function() {
       );
     });
 
-    it('fails when maxTime already set', function() {
+    it('fails when maxTime already set', function () {
       let timebounds = {
         minTime: '1455287522',
         maxTime: '1455297545'
@@ -504,7 +504,7 @@ describe('TransactionBuilder', function() {
       );
     });
 
-    it('sets timebounds.maxTime when minTime already set', function() {
+    it('sets timebounds.maxTime when minTime already set', function () {
       let timebounds = {
         minTime: '1455287522',
         maxTime: '0'
@@ -534,7 +534,7 @@ describe('TransactionBuilder', function() {
         timeoutTimestamp.toString()
       );
     });
-    it('works with TimeoutInfinite', function() {
+    it('works with TimeoutInfinite', function () {
       let source = new StellarBase.Account(
         'GCEZWKCA5VLDNRLN3RPRJMRZOX3Z6G5CHCGSNFHEYVXM3XOJMDS674JZ',
         '0'
@@ -549,8 +549,8 @@ describe('TransactionBuilder', function() {
       }).to.not.throw();
     });
   });
-  describe('.buildFeeBumpTransaction', function() {
-    it('builds a fee bump transaction', function(done) {
+  describe('.buildFeeBumpTransaction', function () {
+    it('builds a fee bump transaction', function (done) {
       const networkPassphrase = 'Standalone Network ; February 2017';
       const innerSource = StellarBase.Keypair.master(networkPassphrase);
       const innerAccount = new StellarBase.Account(
@@ -677,20 +677,22 @@ describe('TransactionBuilder', function() {
         operations: v1Tx.operations(),
         ext: new StellarBase.xdr.TransactionV0Ext(0)
       });
-      const innerV0TxEnvelope = new StellarBase.xdr.TransactionEnvelope.envelopeTypeTxV0(
-        new StellarBase.xdr.TransactionV0Envelope({
-          tx: v0Tx,
-          signatures: innerTxEnvelope.v1().signatures()
-        })
-      );
+      const innerV0TxEnvelope =
+        new StellarBase.xdr.TransactionEnvelope.envelopeTypeTxV0(
+          new StellarBase.xdr.TransactionV0Envelope({
+            tx: v0Tx,
+            signatures: innerTxEnvelope.v1().signatures()
+          })
+        );
       expect(innerV0TxEnvelope.v0().signatures()).to.have.length(1);
 
-      const feeBumpV0Tx = StellarBase.TransactionBuilder.buildFeeBumpTransaction(
-        feeSource,
-        '200',
-        new StellarBase.Transaction(innerV0TxEnvelope, networkPassphrase),
-        networkPassphrase
-      );
+      const feeBumpV0Tx =
+        StellarBase.TransactionBuilder.buildFeeBumpTransaction(
+          feeSource,
+          '200',
+          new StellarBase.Transaction(innerV0TxEnvelope, networkPassphrase),
+          networkPassphrase
+        );
 
       expect(feeBumpTx.toXDR()).to.equal(feeBumpV0Tx.toXDR());
 
@@ -698,8 +700,8 @@ describe('TransactionBuilder', function() {
     });
   });
 
-  describe('.fromXDR', function() {
-    it('builds a fee bump transaction', function() {
+  describe('.fromXDR', function () {
+    it('builds a fee bump transaction', function () {
       const xdr =
         'AAAABQAAAADgSJG2GOUMy/H9lHyjYZOwyuyytH8y0wWaoc596L+bEgAAAAAAAADIAAAAAgAAAABzdv3ojkzWHMD7KUoXhrPx0GH18vHKV0ZfqpMiEblG1gAAAAAAAABkAAAAAAAAAAgAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAPSGFwcHkgYmlydGhkYXkhAAAAAAEAAAAAAAAAAQAAAADgSJG2GOUMy/H9lHyjYZOwyuyytH8y0wWaoc596L+bEgAAAAAAAAAEqBfIAAAAAAAAAAABEblG1gAAAECu6ENUJQ06njC7mcN78Y3CJvJfFEg07EpVVVDP+gm3FO4ijzrAaGXR6otHdCnpQpcC/LieBH1tgViW9lBsCP4JAAAAAAAAAAHov5sSAAAAQFbk0woeHJGOJa2ZpVoIOQoEAPVcDZ7ycTantXxqNkPqRP99hnCXyWN8bQY/bnfmIYspvO3vyqsIXUe0Ee/09Qg=';
       let tx = StellarBase.TransactionBuilder.fromXDR(
@@ -716,7 +718,7 @@ describe('TransactionBuilder', function() {
       expect(tx).to.be.an.instanceof(StellarBase.FeeBumpTransaction);
       expect(tx.toXDR()).to.equal(xdr);
     });
-    it('builds a transaction', function() {
+    it('builds a transaction', function () {
       const xdr =
         'AAAAAgAAAQAAAAAAAAAAAj8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAAAAAGQAAAAAAAAE0wAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAQAAABZUZXN0aW5nIG11eGVkIGFjY291bnRzAAAAAAABAAAAAQAAAQAAAAAAAAAAAj8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAQAAAQAAAAAAAAAAAT8MNL+TrQ2ZcdBMzJD3BVEcg4qtlzSkovsNegP8f+iaAAAAAAAAAAJUC+QAAAAAAAAAAAFW/AX3AAAAQMLrFvPxymi6sReCy8JqMWnh9QH3kNtGyA2rpPA1u0+6EbriBLFNfavPs0AfPHcjnDMw815BM/+q0Co4VBWSygk=';
       let tx = StellarBase.TransactionBuilder.fromXDR(
@@ -735,7 +737,7 @@ describe('TransactionBuilder', function() {
     });
   });
 
-  describe('muxed account support', function() {
+  describe('muxed account support', function () {
     // Simultaneously, let's test some of the operations that should support
     // muxed accounts.
     const asset = StellarBase.Asset.native();
@@ -755,7 +757,7 @@ describe('TransactionBuilder', function() {
     const networkPassphrase = 'Standalone Network ; February 2017';
     const signer = StellarBase.Keypair.master(StellarBase.Networks.TESTNET);
 
-    it('works with muxed accounts by default', function() {
+    it('works with muxed accounts by default', function () {
       const operations = [
         StellarBase.Operation.payment({
           source: source.accountId(),
@@ -822,7 +824,7 @@ describe('TransactionBuilder', function() {
       expect(clawbackOp.from).to.equal(destination);
     });
 
-    it('does not regress js-stellar-sdk#646', function() {
+    it('does not regress js-stellar-sdk#646', function () {
       // arrange
       const secretKey =
         'SDUYQO2PCSM7WUCX7SAFQOYGNGLNISPMILCHXQVPXVDFYYZ7LYTBPRXD';
@@ -854,7 +856,7 @@ describe('TransactionBuilder', function() {
       }).to.not.throw();
     });
 
-    it('works with fee-bump transactions', function() {
+    it('works with fee-bump transactions', function () {
       // We create a non-muxed transaction, then fee-bump with a muxed source.
       let builder = new StellarBase.TransactionBuilder(source.baseAccount(), {
         fee: '100',
