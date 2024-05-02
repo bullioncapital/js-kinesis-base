@@ -1,5 +1,4 @@
-import isString from 'lodash/isString';
-import BigNumber from 'bignumber.js';
+import BigNumber from './util/bignumber';
 
 import { StrKey } from './strkey';
 
@@ -29,7 +28,7 @@ export class Account {
     if (!StrKey.isValidEd25519PublicKey(accountId)) {
       throw new Error('accountId is invalid');
     }
-    if (!isString(sequence)) {
+    if (!(typeof sequence === 'string')) {
       throw new Error('sequence must be of type string');
     }
 
@@ -58,6 +57,6 @@ export class Account {
    * @returns {void}
    */
   incrementSequenceNumber() {
-    this.sequence = this.sequence.add(1);
+    this.sequence = this.sequence.plus(1);
   }
 }

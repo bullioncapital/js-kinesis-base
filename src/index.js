@@ -1,3 +1,4 @@
+/* eslint-disable import/no-import-module-exports */
 import xdr from './generated/stellar-xdr_generated';
 
 export { xdr };
@@ -8,7 +9,7 @@ export {
   LiquidityPoolFeeV18
 } from './get_liquidity_pool_id';
 export { Keypair } from './keypair';
-export { UnsignedHyper, Hyper } from 'js-xdr';
+export { UnsignedHyper, Hyper } from '@stellar/js-xdr';
 export { TransactionBase } from './transaction_base';
 export { Transaction } from './transaction';
 export { FeeBumpTransaction } from './fee_bump_transaction';

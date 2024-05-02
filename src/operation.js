@@ -1,12 +1,12 @@
 /* eslint-disable no-bitwise */
 
-import { Hyper } from 'js-xdr';
-import BigNumber from 'bignumber.js';
+import { Hyper } from '@stellar/js-xdr';
 import trimEnd from 'lodash/trimEnd';
 import isUndefined from 'lodash/isUndefined';
 import isString from 'lodash/isString';
 import isNumber from 'lodash/isNumber';
 import isFinite from 'lodash/isFinite';
+import BigNumber from './util/bignumber';
 import { best_r } from './util/continued_fraction';
 import { Asset } from './asset';
 import { LiquidityPoolAsset } from './liquidity_pool_asset';
@@ -186,10 +186,7 @@ export class Operation {
       case 'allowTrust': {
         result.type = 'allowTrust';
         result.trustor = accountIdtoAddress(attrs.trustor());
-        result.assetCode = attrs
-          .asset()
-          .value()
-          .toString();
+        result.assetCode = attrs.asset().value().toString();
         result.assetCode = trimEnd(result.assetCode, '\0');
         result.authorize = attrs.authorize();
         break;
@@ -214,22 +211,13 @@ export class Operation {
 
         if (attrs.signer()) {
           const signer = {};
-          const arm = attrs
-            .signer()
-            .key()
-            .arm();
+          const arm = attrs.signer().key().arm();
           if (arm === 'ed25519') {
             signer.ed25519PublicKey = accountIdtoAddress(attrs.signer().key());
           } else if (arm === 'preAuthTx') {
-            signer.preAuthTx = attrs
-              .signer()
-              .key()
-              .preAuthTx();
+            signer.preAuthTx = attrs.signer().key().preAuthTx();
           } else if (arm === 'hashX') {
-            signer.sha256Hash = attrs
-              .signer()
-              .key()
-              .hashX();
+            signer.sha256Hash = attrs.signer().key().hashX();
           }
 
           signer.weight = attrs.signer().weight();
@@ -340,7 +328,8 @@ export class Operation {
 
         const mapping = {
           authorized: xdr.TrustLineFlags.authorizedFlag(),
-          authorizedToMaintainLiabilities: xdr.TrustLineFlags.authorizedToMaintainLiabilitiesFlag(),
+          authorizedToMaintainLiabilities:
+            xdr.TrustLineFlags.authorizedToMaintainLiabilitiesFlag(),
           clawbackEnabled: xdr.TrustLineFlags.trustlineClawbackEnabledFlag()
         };
 
@@ -404,7 +393,7 @@ export class Operation {
       // < 0
       amount.isNegative() ||
       // > Max value
-      amount.times(ONE).greaterThan(new BigNumber(MAX_INT64).toString()) ||
+      amount.times(ONE).isGreaterThan(new BigNumber(MAX_INT64).toString()) ||
       // Decimal places (max 7)
       amount.decimalPlaces() > 7 ||
       // NaN or Infinity
@@ -458,7 +447,7 @@ export class Operation {
    * @returns {Hyper} XDR amount
    */
   static _toXDRAmount(value) {
-    const amount = new BigNumber(value).mul(ONE);
+    const amount = new BigNumber(value).times(ONE);
     return Hyper.fromString(amount.toString());
   }
 
@@ -540,19 +529,13 @@ function extractRevokeSponshipDetails(attrs, result) {
         case xdr.LedgerEntryType.offer().name: {
           result.type = 'revokeOfferSponsorship';
           result.seller = accountIdtoAddress(ledgerKey.offer().sellerId());
-          result.offerId = ledgerKey
-            .offer()
-            .offerId()
-            .toString();
+          result.offerId = ledgerKey.offer().offerId().toString();
           break;
         }
         case xdr.LedgerEntryType.data().name: {
           result.type = 'revokeDataSponsorship';
           result.account = accountIdtoAddress(ledgerKey.data().accountId());
-          result.name = ledgerKey
-            .data()
-            .dataName()
-            .toString('ascii');
+          result.name = ledgerKey.data().dataName().toString('ascii');
           break;
         }
         case xdr.LedgerEntryType.claimableBalance().name: {

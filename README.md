@@ -34,6 +34,7 @@ relative to your html file.
 
 ```html
 <script src="stellar-base.js"></script>
+
 <script>
   console.log(StellarBase);
 </script>
@@ -52,7 +53,7 @@ yarn add stellar-base
 2. require/import it in your JavaScript:
 
 ```js
-var StellarBase = require('stellar-base');
+var StellarBase = require("stellar-base");
 ```
 
 ### To self host for use in the browser
@@ -67,6 +68,7 @@ bower install stellar-base
 
 ```html
 <script src="./bower_components/stellar-base/stellar-base.js"></script>
+
 <script>
   console.log(StellarBase);
 </script>
@@ -83,6 +85,7 @@ If you don't want to use install Bower, you can copy built JS files from the
 
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-base/{version}/stellar-base.js"></script>
+
 <script>
   console.log(StellarBase);
 </script>
@@ -96,11 +99,11 @@ Make sure that you are using the latest version number. They can be found on the
 
 ### To develop and test js-stellar-base itself
 
-1. Install Node 10.16.3
+1. Install Node 18.x
 
-Because we support earlier versions of Node, please install and develop on Node 10.16.3 so you don't get surprised when your code works locally but breaks in CI.
+We support the oldest LTS release of Node, which is [currently 18.x](https://nodejs.org/en/about/releases/). Please likewise install and develop on Node 16 so you don't get surprised when your code works locally but breaks in CI.
 
-If you work on several projects that use different Node versions, you might find helpful to install a nodejs version manager.
+If you work on several projects that use different Node versions, you might find helpful to install a NodeJS version manager:
 
 - https://github.com/creationix/nvm
 - https://github.com/wbyoung/avn
@@ -113,65 +116,39 @@ This project uses [Yarn](https://yarnpkg.com/) to manages its dependencies. To i
 3. Clone the repo
 
 ```shell
-git clone https://github.com/stellar/js-stellar-base.git
+git clone https://github.com/bullioncapital/js-kinesis-base.git
 ```
 
-4. Install dependencies inside js-stellar-base folder
+4. Install dependencies inside js-kinesis-base folder
 
 ```shell
-cd js-stellar-base
+cd js-kinesis-base
 yarn
 ```
 
 5. Observe the project's code style
 
-While you're making changes, make sure to run the linter-watcher to catch any
+While you're making changes, make sure to regularly run the linter to catch any
 linting errors (in addition to making sure your text editor supports ESLint)
 
 ```shell
-node_modules/.bin/gulp watch
+yarn lint
+```
+
+as well as fixing any formatting errors with
+
+```shell
+yarn fmt
 ```
 
 If you're working on a file not in `src`, limit your code to Node 6.16 ES! See
-what's supported here: https://node.green/ (The reason is that our npm library
-must support earlier versions of Node, so the tests need to run on those
-versions.)
+what's supported here: https://node.green/. (Our npm library must support
+earlier versions of Node, so the tests need to run on those versions.)
 
 #### Updating XDR definitions
 
-1. Make sure you have [Ruby](https://www.ruby-lang.org/en/) installed. You can
-   either use a global installation, or use a version manager.
-
-- https://www.ruby-lang.org/en/downloads/
-- https://github.com/rbenv/rbenv
-- https://rvm.io
-- https://github.com/asdf-vm/asdf
-
-2. Install [Bundler](https://bundler.io).
-3. Install all dependencies.
-4. Copy xdr files from
-   https://github.com/stellar/stellar-core/tree/master/src/xdr to `./xdr`.
-5. Run `yarn xdr` from the js-stellar-base folder.
-6. Transform the newly-generated JS into TypeScript using [dts-xdr](https://github.com/stellar/dts-xdr):
-
-To "scriptify" the above instructions, here are the steps one by one:
-
-```bash
-git clone https://github.com/stellar/js-stellar-base
-cd js-stellar-base
-bundle install
-yarn
-yarn xdr
-
-# If src/generated/stellar-xdr_generated.js changed, then:
-git clone https://github.com/stellar/dts-xdr
-cd dts-xdr
-npm install
-OUT=stellar-xdr_generated.d.ts npx jscodeshift -t src/transform.js ../src/generated/stellar-xdr_generated.js
-cp stellar-xdr_generated.d.ts ../types/xdr.d.ts
-cd .. && rm -rf dts-xdr
-yarn run prettier --write types/xdr.d.ts
-```
+1. Make sure you have [Docker](https://www.docker.com/) installed and running.
+2. `make reset-xdr`
 
 ## Usage
 
@@ -183,17 +160,15 @@ For information on how to use js-stellar-base, take a look at the docs in the
 To run all tests:
 
 ```shell
-gulp test
+yarn test
 ```
 
 To run a specific set of tests:
 
 ```shell
-gulp test:node
-gulp test:browser
+yarn test:node
+yarn test:browser
 ```
-
-You can also run `yarn test` for a simpler subset of the test cases.
 
 Tests are also run automatically in Github Actions for every master commit and
 pull request.
@@ -213,9 +188,9 @@ contribute to this project.
 npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease]
 ```
 
-A new version will be published to npm **and** Bower by Travis CI.
+A new version will be published to npm **and** Bower by GitHub Actions.
 
-npm >=2.13.0 required. Read more about
+npm >= 2.13.0 required. Read more about
 [npm version](https://docs.npmjs.com/cli/version).
 
 ## License

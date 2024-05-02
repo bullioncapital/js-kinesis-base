@@ -1,5 +1,4 @@
-import isUndefined from 'lodash/isUndefined';
-import { Hyper } from 'js-xdr';
+import { Hyper } from '@stellar/js-xdr';
 import xdr from '../generated/stellar-xdr_generated';
 /**
  * Returns a XDR ManageBuyOfferOp. A "manage buy offer" operation creates, updates, or
@@ -26,12 +25,12 @@ export function manageBuyOffer(opts) {
     throw new TypeError(this.constructAmountRequirementsError('buyAmount'));
   }
   attributes.buyAmount = this._toXDRAmount(opts.buyAmount);
-  if (isUndefined(opts.price)) {
+  if (opts.price === undefined) {
     throw new TypeError('price argument is required');
   }
   attributes.price = this._toXDRPrice(opts.price);
 
-  if (!isUndefined(opts.offerId)) {
+  if (opts.offerId !== undefined) {
     opts.offerId = opts.offerId.toString();
   } else {
     opts.offerId = '0';
