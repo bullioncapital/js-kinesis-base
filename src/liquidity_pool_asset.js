@@ -1,4 +1,3 @@
-import clone from 'lodash/clone';
 import xdr from './generated/stellar-xdr_generated';
 import { Asset } from './asset';
 import {
@@ -83,11 +82,11 @@ export class LiquidityPoolAsset {
    * @returns {LiquidityPoolParameters} Liquidity pool parameters.
    */
   getLiquidityPoolParameters() {
-    return clone({
+    return {
       assetA: this.assetA,
       assetB: this.assetB,
       fee: this.fee
-    });
+    };
   }
 
   /**

@@ -1,8 +1,4 @@
 /* eslint-disable no-param-reassign */
-
-import isUndefined from 'lodash/isUndefined';
-import isString from 'lodash/isString';
-
 import xdr from '../generated/stellar-xdr_generated';
 import { Keypair } from '../keypair';
 import { StrKey } from '../strkey';
@@ -86,7 +82,10 @@ export function setOptions(opts) {
     weightCheckFunction
   );
 
-  if (!isUndefined(opts.homeDomain) && !isString(opts.homeDomain)) {
+  if (
+    typeof opts.homeDomain !== 'undefined' &&
+    typeof opts.homeDomain !== 'string'
+  ) {
     throw new TypeError('homeDomain argument must be of type String');
   }
   attributes.homeDomain = opts.homeDomain;
@@ -115,7 +114,7 @@ export function setOptions(opts) {
     }
 
     if (opts.signer.preAuthTx) {
-      if (isString(opts.signer.preAuthTx)) {
+      if (typeof opts.signer.preAuthTx === 'string') {
         opts.signer.preAuthTx = Buffer.from(opts.signer.preAuthTx, 'hex');
       }
 
@@ -134,7 +133,7 @@ export function setOptions(opts) {
     }
 
     if (opts.signer.sha256Hash) {
-      if (isString(opts.signer.sha256Hash)) {
+      if (typeof opts.signer.sha256Hash === 'string') {
         opts.signer.sha256Hash = Buffer.from(opts.signer.sha256Hash, 'hex');
       }
 
