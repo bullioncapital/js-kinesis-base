@@ -1,7 +1,4 @@
 import nacl from 'tweetnacl';
-import isUndefined from 'lodash/isUndefined';
-import isString from 'lodash/isString';
-
 import { sign, verify, generate } from './signing';
 import { StrKey } from './strkey';
 import { hash } from './hashing';
@@ -137,8 +134,8 @@ export class Keypair {
    * @return {xdr.MuxedAccount}
    */
   xdrMuxedAccount(id) {
-    if (!isUndefined(id)) {
-      if (!isString(id)) {
+    if (typeof id !== 'undefined') {
+      if (typeof id !== 'string') {
         throw new TypeError(`expected string for ID, got ${typeof id}`);
       }
 

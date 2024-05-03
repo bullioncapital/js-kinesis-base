@@ -1,9 +1,5 @@
 import { UnsignedHyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
-import clone from 'lodash/clone';
-import isUndefined from 'lodash/isUndefined';
-import isString from 'lodash/isString';
-
 import xdr from './generated/stellar-xdr_generated';
 import { Keypair } from './keypair';
 import { Transaction } from './transaction';
@@ -102,7 +98,7 @@ export class TransactionBuilder {
       throw new Error('must specify source account for the transaction');
     }
 
-    if (isUndefined(opts.fee)) {
+    if (opts.fee === undefined) {
       throw new Error('must specify fee for the transaction (in stroops)');
     }
 
@@ -110,7 +106,7 @@ export class TransactionBuilder {
     this.operations = [];
 
     this.baseFee = opts.fee;
-    this.timebounds = clone(opts.timebounds) || null;
+    this.timebounds = opts.timebounds ? { ...opts.timebounds } : null;
     this.memo = opts.memo || Memo.none();
     this.networkPassphrase = opts.networkPassphrase || null;
     this.supportMuxedAccounts = opts.withMuxing || false;
@@ -365,7 +361,7 @@ export class TransactionBuilder {
     }
 
     let feeSourceAccount;
-    if (isString(feeSource)) {
+    if (typeof feeSource === 'string') {
       feeSourceAccount = decodeAddressToMuxedAccount(feeSource);
     } else {
       feeSourceAccount = feeSource.xdrMuxedAccount();
