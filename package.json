@@ -1,6 +1,6 @@
 {
   "name": "@abx/js-kinesis-base",
-  "version": "7.1.0-beta.1",
+  "version": "7.1.0-beta.2",
   "description": "Low level stellar support library",
   "main": "./lib/index.js",
   "browser": {
