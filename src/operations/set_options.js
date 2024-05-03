@@ -82,7 +82,10 @@ export function setOptions(opts) {
     weightCheckFunction
   );
 
-  if (typeof opts.homeDomain !== 'undefined' && typeof opts.homeDomain !== 'string') {
+  if (
+    typeof opts.homeDomain !== 'undefined' &&
+    typeof opts.homeDomain !== 'string'
+  ) {
     throw new TypeError('homeDomain argument must be of type String');
   }
   attributes.homeDomain = opts.homeDomain;
