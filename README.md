@@ -184,14 +184,8 @@ contribute to this project.
 
 ## Publishing to npm
 
-```
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease]
-```
-
-A new version will be published to npm **and** Bower by GitHub Actions.
-
-npm >= 2.13.0 required. Read more about
-[npm version](https://docs.npmjs.com/cli/version).
+- Update `package.json` version
+- Publish new release via GitHub release
 
 ## License
 
