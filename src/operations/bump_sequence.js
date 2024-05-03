@@ -1,6 +1,5 @@
 import { Hyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
-import isString from 'lodash/isString';
 import xdr from '../generated/stellar-xdr_generated';
 
 /**
@@ -15,7 +14,7 @@ import xdr from '../generated/stellar-xdr_generated';
 export function bumpSequence(opts) {
   const attributes = {};
 
-  if (!isString(opts.bumpTo)) {
+  if (typeof opts.bumpTo !== 'string') {
     throw new Error('bumpTo must be a string');
   }
 
