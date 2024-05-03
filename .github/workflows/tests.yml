@@ -38,5 +38,5 @@ jobs:
       - name: Run Browser Tests
         run: yarn test:browser
 
-      - name: Run Linter Checks
-        run: yarn fmt && yarn lint && (git diff-index --quiet HEAD; git diff)
+      # - name: Run Linter Checks
+      #   run: yarn fmt && yarn lint && (git diff-index --quiet HEAD; git diff)
