@@ -157,7 +157,7 @@ describe('FeeBumpTransaction', function () {
 
       expect(transaction.signatures.length).to.equal(0);
     });
-    
+
     // do not manipulate fee
     xit('does not return a reference to the source transaction', function () {
       const transaction = this.transaction;
