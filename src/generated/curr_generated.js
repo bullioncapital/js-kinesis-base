@@ -2001,6 +2001,8 @@ xdr.union("LedgerHeaderExt", {
 //       uint64 idPool; // last used global ID, used for generating objects
 //   
 //       uint32 baseFee;     // base fee per operation in stroops
+//       uint32 basePercentageFee;     // base percentage fee per create account and payment operation, in basis points
+//       uint64 maxFee;     // max fee  transactions like per create account and payment operation
 //       uint32 baseReserve; // account base reserve in stroops
 //   
 //       uint32 maxTxSetSize; // maximum size a transaction set can be
@@ -2035,6 +2037,8 @@ xdr.struct("LedgerHeader", [
   ["inflationSeq", xdr.lookup("Uint32")],
   ["idPool", xdr.lookup("Uint64")],
   ["baseFee", xdr.lookup("Uint32")],
+  ["basePercentageFee", xdr.lookup("Uint32")],
+  ["maxFee", xdr.lookup("Uint64")],
   ["baseReserve", xdr.lookup("Uint32")],
   ["maxTxSetSize", xdr.lookup("Uint32")],
   ["skipList", xdr.array(xdr.lookup("Hash"), 4)],
@@ -2049,7 +2053,9 @@ xdr.struct("LedgerHeader", [
 //       LEDGER_UPGRADE_BASE_FEE = 2,
 //       LEDGER_UPGRADE_MAX_TX_SET_SIZE = 3,
 //       LEDGER_UPGRADE_BASE_RESERVE = 4,
-//       LEDGER_UPGRADE_FLAGS = 5
+//       LEDGER_UPGRADE_BASE_PERCENTAGE_FEE = 5,
+//       LEDGER_UPGRADE_MAX_FEE = 6,
+//       LEDGER_UPGRADE_FLAGS = 7
 //   };
 //
 // ===========================================================================
@@ -2058,7 +2064,9 @@ xdr.enum("LedgerUpgradeType", {
   ledgerUpgradeBaseFee: 2,
   ledgerUpgradeMaxTxSetSize: 3,
   ledgerUpgradeBaseReserve: 4,
-  ledgerUpgradeFlags: 5,
+  ledgerUpgradeBasePercentageFee: 5,
+  ledgerUpgradeMaxFee: 6,
+  ledgerUpgradeFlags: 7,
 });
 
 // === xdr source ============================================================
@@ -2073,6 +2081,10 @@ xdr.enum("LedgerUpgradeType", {
 //       uint32 newMaxTxSetSize; // update maxTxSetSize
 //   case LEDGER_UPGRADE_BASE_RESERVE:
 //       uint32 newBaseReserve; // update baseReserve
+//   case LEDGER_UPGRADE_BASE_PERCENTAGE_FEE:
+//       uint32 newBasePercentageFee; // update basePercentageFee
+//   case LEDGER_UPGRADE_MAX_FEE:
+//       uint64 newMaxFee; // update maxFee
 //   case LEDGER_UPGRADE_FLAGS:
 //       uint32 newFlags; // update flags
 //   };
@@ -2086,6 +2098,8 @@ xdr.union("LedgerUpgrade", {
     ["ledgerUpgradeBaseFee", "newBaseFee"],
     ["ledgerUpgradeMaxTxSetSize", "newMaxTxSetSize"],
     ["ledgerUpgradeBaseReserve", "newBaseReserve"],
+    ["ledgerUpgradeBasePercentageFee", "newBasePercentageFee"],
+    ["ledgerUpgradeMaxFee", "newMaxFee"],
     ["ledgerUpgradeFlags", "newFlags"],
   ],
   arms: {
@@ -2093,6 +2107,8 @@ xdr.union("LedgerUpgrade", {
     newBaseFee: xdr.lookup("Uint32"),
     newMaxTxSetSize: xdr.lookup("Uint32"),
     newBaseReserve: xdr.lookup("Uint32"),
+    newBasePercentageFee: xdr.lookup("Uint32"),
+    newMaxFee: xdr.lookup("Uint64"),
     newFlags: xdr.lookup("Uint32"),
   },
 });
@@ -2805,6 +2821,20 @@ xdr.struct("SendMore", [
 
 // === xdr source ============================================================
 //
+//   struct SendMoreExtended
+//   {
+//       uint32 numMessages;
+//       uint32 numBytes;
+//   };
+//
+// ===========================================================================
+xdr.struct("SendMoreExtended", [
+  ["numMessages", xdr.lookup("Uint32")],
+  ["numBytes", xdr.lookup("Uint32")],
+]);
+
+// === xdr source ============================================================
+//
 //   struct AuthCert
 //   {
 //       Curve25519Public pubkey;
@@ -2849,10 +2879,10 @@ xdr.struct("Hello", [
 
 // === xdr source ============================================================
 //
-//   const AUTH_MSG_FLAG_PULL_MODE_REQUESTED = 100;
+//   const AUTH_MSG_FLAG_FLOW_CONTROL_BYTES_REQUESTED = 200;
 //
 // ===========================================================================
-xdr.const("AUTH_MSG_FLAG_PULL_MODE_REQUESTED", 100);
+xdr.const("AUTH_MSG_FLAG_FLOW_CONTROL_BYTES_REQUESTED", 200);
 
 // === xdr source ============================================================
 //
@@ -2957,6 +2987,8 @@ xdr.struct("PeerAddress", [
 //       SURVEY_RESPONSE = 15,
 //   
 //       SEND_MORE = 16,
+//       SEND_MORE_EXTENDED = 20,
+//   
 //       FLOOD_ADVERT = 18,
 //       FLOOD_DEMAND = 19
 //   };
@@ -2980,6 +3012,7 @@ xdr.enum("MessageType", {
   surveyRequest: 14,
   surveyResponse: 15,
   sendMore: 16,
+  sendMoreExtended: 20,
   floodAdvert: 18,
   floodDemand: 19,
 });
@@ -3008,6 +3041,20 @@ xdr.struct("DontHave", [
 // ===========================================================================
 xdr.enum("SurveyMessageCommandType", {
   surveyTopology: 0,
+});
+
+// === xdr source ============================================================
+//
+//   enum SurveyMessageResponseType
+//   {
+//       SURVEY_TOPOLOGY_RESPONSE_V0 = 0,
+//       SURVEY_TOPOLOGY_RESPONSE_V1 = 1
+//   };
+//
+// ===========================================================================
+xdr.enum("SurveyMessageResponseType", {
+  surveyTopologyResponseV0: 0,
+  surveyTopologyResponseV1: 1,
 });
 
 // === xdr source ============================================================
@@ -3136,7 +3183,7 @@ xdr.typedef("PeerStatList", xdr.varArray(xdr.lookup("PeerStats"), 25));
 
 // === xdr source ============================================================
 //
-//   struct TopologyResponseBody
+//   struct TopologyResponseBodyV0
 //   {
 //       PeerStatList inboundPeers;
 //       PeerStatList outboundPeers;
@@ -3146,7 +3193,7 @@ xdr.typedef("PeerStatList", xdr.varArray(xdr.lookup("PeerStats"), 25));
 //   };
 //
 // ===========================================================================
-xdr.struct("TopologyResponseBody", [
+xdr.struct("TopologyResponseBodyV0", [
   ["inboundPeers", xdr.lookup("PeerStatList")],
   ["outboundPeers", xdr.lookup("PeerStatList")],
   ["totalInboundPeerCount", xdr.lookup("Uint32")],
@@ -3155,21 +3202,49 @@ xdr.struct("TopologyResponseBody", [
 
 // === xdr source ============================================================
 //
-//   union SurveyResponseBody switch (SurveyMessageCommandType type)
+//   struct TopologyResponseBodyV1
 //   {
-//   case SURVEY_TOPOLOGY:
-//       TopologyResponseBody topologyResponseBody;
+//       PeerStatList inboundPeers;
+//       PeerStatList outboundPeers;
+//   
+//       uint32 totalInboundPeerCount;
+//       uint32 totalOutboundPeerCount;
+//   
+//       uint32 maxInboundPeerCount;
+//       uint32 maxOutboundPeerCount;
+//   };
+//
+// ===========================================================================
+xdr.struct("TopologyResponseBodyV1", [
+  ["inboundPeers", xdr.lookup("PeerStatList")],
+  ["outboundPeers", xdr.lookup("PeerStatList")],
+  ["totalInboundPeerCount", xdr.lookup("Uint32")],
+  ["totalOutboundPeerCount", xdr.lookup("Uint32")],
+  ["maxInboundPeerCount", xdr.lookup("Uint32")],
+  ["maxOutboundPeerCount", xdr.lookup("Uint32")],
+]);
+
+// === xdr source ============================================================
+//
+//   union SurveyResponseBody switch (SurveyMessageResponseType type)
+//   {
+//   case SURVEY_TOPOLOGY_RESPONSE_V0:
+//       TopologyResponseBodyV0 topologyResponseBodyV0;
+//   case SURVEY_TOPOLOGY_RESPONSE_V1:
+//       TopologyResponseBodyV1 topologyResponseBodyV1;
 //   };
 //
 // ===========================================================================
 xdr.union("SurveyResponseBody", {
-  switchOn: xdr.lookup("SurveyMessageCommandType"),
+  switchOn: xdr.lookup("SurveyMessageResponseType"),
   switchName: "type",
   switches: [
-    ["surveyTopology", "topologyResponseBody"],
+    ["surveyTopologyResponseV0", "topologyResponseBodyV0"],
+    ["surveyTopologyResponseV1", "topologyResponseBodyV1"],
   ],
   arms: {
-    topologyResponseBody: xdr.lookup("TopologyResponseBody"),
+    topologyResponseBodyV0: xdr.lookup("TopologyResponseBodyV0"),
+    topologyResponseBodyV1: xdr.lookup("TopologyResponseBodyV1"),
   },
 });
 
@@ -3269,7 +3344,8 @@ xdr.struct("FloodDemand", [
 //       uint32 getSCPLedgerSeq; // ledger seq requested ; if 0, requests the latest
 //   case SEND_MORE:
 //       SendMore sendMoreMessage;
-//   
+//   case SEND_MORE_EXTENDED:
+//       SendMoreExtended sendMoreExtendedMessage;
 //   // Pull mode
 //   case FLOOD_ADVERT:
 //        FloodAdvert floodAdvert;
@@ -3299,6 +3375,7 @@ xdr.union("StellarMessage", {
     ["scpMessage", "envelope"],
     ["getScpState", "getScpLedgerSeq"],
     ["sendMore", "sendMoreMessage"],
+    ["sendMoreExtended", "sendMoreExtendedMessage"],
     ["floodAdvert", "floodAdvert"],
     ["floodDemand", "floodDemand"],
   ],
@@ -3319,6 +3396,7 @@ xdr.union("StellarMessage", {
     envelope: xdr.lookup("ScpEnvelope"),
     getScpLedgerSeq: xdr.lookup("Uint32"),
     sendMoreMessage: xdr.lookup("SendMore"),
+    sendMoreExtendedMessage: xdr.lookup("SendMoreExtended"),
     floodAdvert: xdr.lookup("FloodAdvert"),
     floodDemand: xdr.lookup("FloodDemand"),
   },
