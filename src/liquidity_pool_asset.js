@@ -1,4 +1,4 @@
-import xdr from './generated/stellar-xdr_generated';
+import xdr from './xdr';
 import { Asset } from './asset';
 import {
   LiquidityPoolFeeV18,
@@ -83,6 +83,7 @@ export class LiquidityPoolAsset {
    */
   getLiquidityPoolParameters() {
     return {
+      ...this,
       assetA: this.assetA,
       assetB: this.assetB,
       fee: this.fee

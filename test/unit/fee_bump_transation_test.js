@@ -44,7 +44,7 @@ describe('FeeBumpTransaction', function () {
     );
   });
 
-  it('constructs a FeeBumTransaction object from a TransactionEnvelope', function () {
+  it('constructs a FeeBumpTransaction object from a TransactionEnvelope', function () {
     const transaction = this.transaction;
     transaction.sign(this.feeSource);
 
@@ -157,8 +157,7 @@ describe('FeeBumpTransaction', function () {
 
       expect(transaction.signatures.length).to.equal(0);
     });
-    // do not manipulate fee
-    xit('does not return a reference to the source transaction', function () {
+    it('does not return a reference to the source transaction', function () {
       const transaction = this.transaction;
       const envelope = transaction.toEnvelope().value();
       envelope.tx().fee(StellarBase.xdr.Int64.fromString('300'));

@@ -1,4 +1,4 @@
-import xdr from './generated/stellar-xdr_generated';
+import xdr from './xdr';
 
 /**
  * LiquidityPoolId class represents the asset referenced by a trustline to a
@@ -52,7 +52,7 @@ export class LiquidityPoolId {
    * @returns {string} Liquidity pool ID.
    */
   getLiquidityPoolId() {
-    return this.liquidityPoolId;
+    return String(this.liquidityPoolId);
   }
 
   /**

@@ -136,6 +136,7 @@ export class Keypair {
   canSign(): boolean;
   sign(data: Buffer): Buffer;
   signDecorated(data: Buffer): xdr.DecoratedSignature;
+  signPayloadDecorated(data: Buffer): xdr.DecoratedSignature;
   signatureHint(): Buffer;
   verify(data: Buffer, signature: Buffer): boolean;
 
@@ -260,6 +261,10 @@ export namespace Signer {
     preAuthTx: Buffer;
     weight: number | undefined;
   }
+  interface Ed25519SignedPayload {
+    ed25519SignedPayload: string;
+    weight?: number | string;
+  }
 }
 export namespace SignerKeyOptions {
   interface Ed25519PublicKey {
@@ -271,16 +276,21 @@ export namespace SignerKeyOptions {
   interface PreAuthTx {
     preAuthTx: Buffer | string;
   }
+  interface Ed25519SignedPayload {
+    ed25519SignedPayload: string;
+  }
 }
 export type Signer =
   | Signer.Ed25519PublicKey
   | Signer.Sha256Hash
-  | Signer.PreAuthTx;
+  | Signer.PreAuthTx
+  | Signer.Ed25519SignedPayload;
 
 export type SignerKeyOptions =
   | SignerKeyOptions.Ed25519PublicKey
   | SignerKeyOptions.Sha256Hash
-  | SignerKeyOptions.PreAuthTx;
+  | SignerKeyOptions.PreAuthTx
+  | SignerKeyOptions.Ed25519SignedPayload;
 
 export namespace SignerOptions {
   interface Ed25519PublicKey {
@@ -295,11 +305,16 @@ export namespace SignerOptions {
     preAuthTx: Buffer | string;
     weight?: number | string;
   }
+  interface Ed25519SignedPayload {
+    ed25519SignedPayload: string;
+    weight?: number | string;
+  }
 }
 export type SignerOptions =
   | SignerOptions.Ed25519PublicKey
   | SignerOptions.Sha256Hash
-  | SignerOptions.PreAuthTx;
+  | SignerOptions.PreAuthTx
+  | SignerOptions.Ed25519SignedPayload;
 
 export namespace OperationType {
   type CreateAccount = 'createAccount';
@@ -665,6 +680,8 @@ export namespace Operation {
       ? Signer.Sha256Hash
       : T extends { preAuthTx: any }
       ? Signer.PreAuthTx
+      : T extends { ed25519SignedPayload: any }
+      ? Signer.Ed25519SignedPayload
       : never;
   }
   function setOptions<T extends SignerOptions = never>(
@@ -746,7 +763,7 @@ export namespace Operation {
   ): xdr.Operation<RevokeClaimableBalanceSponsorship>;
 
   interface RevokeLiquidityPoolSponsorship extends BaseOperation<OperationType.RevokeSponsorship> {
-    balanceId: string;
+    liquidityPoolId: string;
   }
   function revokeLiquidityPoolSponsorship(
     options: OperationOptions.RevokeLiquidityPoolSponsorship
@@ -846,26 +863,37 @@ export type Operation =
 
 export namespace StrKey {
   function encodeEd25519PublicKey(data: Buffer): string;
-  function decodeEd25519PublicKey(data: string): Buffer;
+  function decodeEd25519PublicKey(address: string): Buffer;
   function isValidEd25519PublicKey(Key: string): boolean;
 
   function encodeEd25519SecretSeed(data: Buffer): string;
-  function decodeEd25519SecretSeed(data: string): Buffer;
+  function decodeEd25519SecretSeed(address: string): Buffer;
   function isValidEd25519SecretSeed(seed: string): boolean;
 
   function encodeMed25519PublicKey(data: Buffer): string;
-  function decodeMed25519PublicKey(data: string): Buffer;
+  function decodeMed25519PublicKey(address: string): Buffer;
   function isValidMed25519PublicKey(publicKey: string): boolean;
 
+  function encodeSignedPayload(data: Buffer): string;
+  function decodeSignedPayload(address: string): Buffer;
+  function isValidSignedPayload(address: string): boolean;
+
   function encodePreAuthTx(data: Buffer): string;
-  function decodePreAuthTx(data: string): Buffer;
+  function decodePreAuthTx(address: string): Buffer;
 
   function encodeSha256Hash(data: Buffer): string;
-  function decodeSha256Hash(data: string): Buffer;
+  function decodeSha256Hash(address: string): Buffer;
+}
+
+export namespace SignerKey {
+  function decodeAddress(address: string): xdr.SignerKey;
+  function encodeSignerKey(signerKey: xdr.SignerKey): string;
 }
 
 export class TransactionI {
   addSignature(publicKey: string, signature: string): void;
+  addDecoratedSignature(signature: xdr.DecoratedSignature): void;
+
   fee: string;
   getKeypairSignature(keypair: Keypair): string;
   hash(): Buffer;
@@ -903,6 +931,14 @@ export class Transaction<
     minTime: string;
     maxTime: string;
   };
+  ledgerBounds?: {
+    minLedger: number;
+    maxLedger: number;
+  };
+  minAccountSequence?: string;
+  minAccountSequenceAge?: number;
+  minAccountSequenceLedgerGap?: number;
+  extraSigners?: string[];
 
   getClaimableBalanceId(opIndex: number): string;
 }
@@ -918,6 +954,12 @@ export class TransactionBuilder {
   addOperation(operation: xdr.Operation): this;
   addMemo(memo: Memo): this;
   setTimeout(timeoutInSeconds: number): this;
+  setTimebounds(min: Date | number, max: Date | number): this;
+  setLedgerbounds(minLedger: number, maxLedger: number): this;
+  setMinAccountSequence(minAccountSequence: string): this;
+  setMinAccountSequenceAge(durationInSeconds: number): this;
+  setMinAccountSequenceLedgerGap(gap: number): this;
+  setExtraSigners(extraSigners: string[]): this;
   build(): Transaction;
   setNetworkPassphrase(networkPassphrase: string): this;
   static buildFeeBumpTransaction(
@@ -935,13 +977,21 @@ export class TransactionBuilder {
 export namespace TransactionBuilder {
   interface TransactionBuilderOptions {
     fee: string;
-    timebounds?: {
-      minTime?: number | string;
-      maxTime?: number | string;
-    };
     memo?: Memo;
     networkPassphrase?: string;
-    v1?: boolean;
+    // preconditions:
+    timebounds?: {
+      minTime?: Date | number | string;
+      maxTime?: Date | number | string;
+    };
+    ledgerbounds?: {
+      minLedger?: number;
+      maxLedger?: number;
+    };
+    minAccountSequence?: string;
+    minAccountSequenceAge?: number;
+    minAccountSequenceLedgerGap?: number;
+    extraSigners?: string[];
   }
 }
 

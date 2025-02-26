@@ -603,6 +603,19 @@ describe('Transaction', function () {
       );
     });
 
+    // See https://github.com/stellar/js-stellar-base/issues/529
+    it('calculates from transaction src (big number sequence)', function () {
+      let gSource = new StellarBase.Account(address, '114272277834498050');
+
+      let tx = makeBuilder(gSource)
+        .addOperation(makeClaimableBalance())
+        .build();
+      const balanceId = tx.getClaimableBalanceId(0);
+      expect(balanceId).to.be.equal(
+        '000000001cd1e39f422a864b4efca661e11ffaa1c54e69b23aaf096e0cfd361bb4a275bf'
+      );
+    });
+
     it('calculates from muxed transaction src as if unmuxed', function () {
       let gSource = new StellarBase.Account(address, '1234');
       let mSource = new StellarBase.MuxedAccount(gSource, '5678');
@@ -629,6 +642,106 @@ describe('Transaction', function () {
       expect(() => tx.getClaimableBalanceId(1)).to.not.throw();
       expect(() => tx.getClaimableBalanceId(2)).to.throw(/index/);
       expect(() => tx.getClaimableBalanceId(-1)).to.throw(/index/);
+    });
+  });
+
+  describe('preconditions', function () {
+    const address = 'GA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJVSGZ';
+
+    const source = new StellarBase.Account(address, '1234');
+    const makeBuilder = function () {
+      return new StellarBase.TransactionBuilder(source, {
+        fee: StellarBase.BASE_FEE,
+        networkPassphrase: StellarBase.Networks.TESTNET,
+        withMuxing: true
+      });
+    };
+
+    describe('timebounds', function () {
+      it('Date', function () {
+        let now = new Date();
+        let tx = makeBuilder().setTimebounds(now, now).build();
+        const expMin = `${Math.floor(now.valueOf() / 1000)}`;
+        const expMax = `${Math.floor(now.valueOf() / 1000)}`;
+        expect(tx.timeBounds.minTime).to.equal(expMin);
+        expect(tx.timeBounds.maxTime).to.equal(expMax);
+
+        const tb = tx.toEnvelope().v1().tx().cond().timeBounds();
+
+        expect(tb.minTime().toString()).to.equal(expMin);
+        expect(tb.maxTime().toString()).to.equal(expMax);
+      });
+
+      it('number', function () {
+        let tx = makeBuilder().setTimebounds(5, 10).build();
+        expect(tx.timeBounds.minTime).to.eql('5');
+        expect(tx.timeBounds.maxTime).to.eql('10');
+
+        const tb = tx.toEnvelope().v1().tx().cond().timeBounds();
+        expect(tb.minTime().toString()).to.equal('5');
+        expect(tb.maxTime().toString()).to.equal('10');
+      });
+    });
+
+    it('ledgerbounds', function () {
+      let tx = makeBuilder().setTimeout(5).setLedgerbounds(5, 10).build();
+
+      expect(tx.ledgerBounds.minLedger).to.equal(5);
+      expect(tx.ledgerBounds.maxLedger).to.equal(10);
+
+      const lb = tx.toEnvelope().v1().tx().cond().v2().ledgerBounds();
+      expect(lb.minLedger()).to.equal(5);
+      expect(lb.maxLedger()).to.equal(10);
+    });
+
+    it('minAccountSequence', function () {
+      let tx = makeBuilder().setTimeout(5).setMinAccountSequence('5').build();
+      expect(tx.minAccountSequence).to.eql('5');
+
+      const val = tx.toEnvelope().v1().tx().cond().v2().minSeqNum();
+      expect(val.toString()).to.equal('5');
+    });
+
+    it('minAccountSequence (big number)', function () {
+      let tx = makeBuilder()
+        .setTimeout(5)
+        .setMinAccountSequence('103420918407103888')
+        .build();
+      expect(tx.minAccountSequence).to.eql('103420918407103888');
+
+      const val = tx.toEnvelope().v1().tx().cond().v2().minSeqNum();
+      expect(val.toString()).to.equal('103420918407103888');
+    });
+
+    it('minAccountSequenceAge', function () {
+      let tx = makeBuilder().setTimeout(5).setMinAccountSequenceAge(5).build();
+      expect(tx.minAccountSequenceAge.toString()).to.equal('5');
+
+      const val = tx.toEnvelope().v1().tx().cond().v2().minSeqAge();
+      expect(val.toString()).to.equal('5');
+    });
+
+    it('minAccountSequenceLedgerGap', function () {
+      let tx = makeBuilder()
+        .setTimeout(5)
+        .setMinAccountSequenceLedgerGap(5)
+        .build();
+      expect(tx.minAccountSequenceLedgerGap).to.equal(5);
+
+      const val = tx.toEnvelope().v1().tx().cond().v2().minSeqLedgerGap();
+      expect(val.toString()).to.equal('5');
+    });
+
+    it('extraSigners', function () {
+      let tx = makeBuilder().setTimeout(5).setExtraSigners([address]).build();
+      expect(tx.extraSigners).to.have.lengthOf(1);
+      expect(tx.extraSigners.map(StellarBase.SignerKey.encodeSignerKey)).to.eql(
+        [address]
+      );
+
+      const signers = tx.toEnvelope().v1().tx().cond().v2().extraSigners();
+      expect(signers).to.have.lengthOf(1);
+      expect(signers[0]).to.eql(StellarBase.SignerKey.decodeAddress(address));
     });
   });
 });

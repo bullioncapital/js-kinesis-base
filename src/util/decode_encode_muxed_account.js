@@ -1,4 +1,4 @@
-import xdr from '../generated/stellar-xdr_generated';
+import xdr from '../xdr';
 import { StrKey } from '../strkey';
 
 /**
@@ -105,8 +105,8 @@ function _decodeAddressFullyToMuxedAccount(address) {
   // for the Golang implementation of the M... parsing.
   return xdr.MuxedAccount.keyTypeMuxedEd25519(
     new xdr.MuxedAccountMed25519({
-      id: xdr.Uint64.fromXDR(rawBytes.slice(-8)),
-      ed25519: rawBytes.slice(0, -8)
+      id: xdr.Uint64.fromXDR(rawBytes.subarray(-8)),
+      ed25519: rawBytes.subarray(0, -8)
     })
   );
 }

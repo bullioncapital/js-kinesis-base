@@ -244,8 +244,7 @@ describe('TransactionBuilder', function () {
         .build();
     });
 
-    // let client control the fee
-    xit('should have 2000 stroops fee', function (done) {
+    it('should have 2000 stroops fee', function (done) {
       expect(transaction.fee).to.be.equal('2000');
       done();
     });
@@ -672,7 +671,7 @@ describe('TransactionBuilder', function () {
         sourceAccountEd25519: sourceAccountEd25519,
         fee: v1Tx.fee(),
         seqNum: v1Tx.seqNum(),
-        timeBounds: v1Tx.timeBounds(),
+        timeBounds: v1Tx.cond().timeBounds(),
         memo: v1Tx.memo(),
         operations: v1Tx.operations(),
         ext: new StellarBase.xdr.TransactionV0Ext(0)
@@ -825,33 +824,10 @@ describe('TransactionBuilder', function () {
     });
 
     it('does not regress js-stellar-sdk#646', function () {
-      // arrange
-      const secretKey =
-        'SDUYQO2PCSM7WUCX7SAFQOYGNGLNISPMILCHXQVPXVDFYYZ7LYTBPRXD';
-      const account = StellarBase.Keypair.fromSecret(secretKey);
-      const sourceAccount = new StellarBase.Account(account.publicKey(), '0');
-      const tx = new StellarBase.TransactionBuilder(sourceAccount, {
-        fee: 1000,
-        networkPassphrase: StellarBase.Networks.TESTNET
-      })
-        .addOperation(
-          StellarBase.Operation.payment({
-            destination:
-              'GDJJRRMBK4IWLEPJGIE6SXD2LP7REGZODU7WDC3I2D6MR37F4XSHBKX2',
-            asset: StellarBase.Asset.native(),
-            amount: '100'
-          })
-        )
-        .setTimeout(StellarBase.TimeoutInfinite)
-        .build();
-      tx.sign(account);
-      const xdrInput = tx.toXDR();
-
-      // ref. https://github.com/stellar/js-stellar-sdk/issues/645
       expect(() => {
         StellarBase.TransactionBuilder.fromXDR(
-          xdrInput,
-          StellarBase.Networks.TESTNET
+          'AAAAAgAAAABg/GhKJU5ut52ih6Klx0ymGvsac1FPJig1CHYqyesIHQAAJxACBmMCAAAADgAAAAAAAAABAAAAATMAAAAAAAABAAAAAQAAAABg/GhKJU5ut52ih6Klx0ymGvsac1FPJig1CHYqyesIHQAAAAAAAAAAqdkSiA5dzNXstOtkPkHd6dAMPMA+MSXwK8OlrAGCKasAAAAAAcnDgAAAAAAAAAAByesIHQAAAEAuLrTfW6D+HYlUD9y+JolF1qrb40hIRATzsQaQjchKJuhOZJjLO0d7oaTD3JZ4UL4vVKtV7TvV17rQgCQnuz8F',
+          'Public Global Stellar Network ; September 2015'
         );
       }).to.not.throw();
     });

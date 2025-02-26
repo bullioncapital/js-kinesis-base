@@ -1,15 +1,15 @@
 /* eslint-disable no-bitwise */
 
 import { Hyper } from '@stellar/js-xdr';
+import BigNumber from 'bignumber.js';
 import { trimEnd } from './util/util';
-import BigNumber from './util/bignumber';
 import { best_r } from './util/continued_fraction';
 import { Asset } from './asset';
 import { LiquidityPoolAsset } from './liquidity_pool_asset';
 import { Claimant } from './claimant';
 import { StrKey } from './strkey';
 import { LiquidityPoolId } from './liquidity_pool_id';
-import xdr from './generated/stellar-xdr_generated';
+import xdr from './xdr';
 import * as ops from './operations/index';
 import {
   decodeAddressToMuxedAccount,
@@ -214,6 +214,11 @@ export class Operation {
             signer.preAuthTx = attrs.signer().key().preAuthTx();
           } else if (arm === 'hashX') {
             signer.sha256Hash = attrs.signer().key().hashX();
+          } else if (arm === 'ed25519SignedPayload') {
+            const signedPayload = attrs.signer().key().ed25519SignedPayload();
+            signer.ed25519SignedPayload = StrKey.encodeSignedPayload(
+              signedPayload.toXDR()
+            );
           }
 
           signer.weight = attrs.signer().weight();
@@ -371,6 +376,21 @@ export class Operation {
     return result;
   }
 
+  /**
+   * Validates that a given amount is possible for a Stellar asset.
+   *
+   * Specifically, this means that the amount is well, a valid number, but also
+   * that it is within the int64 range and has no more than 7 decimal levels of
+   * precision.
+   *
+   * Note that while smart contracts allow larger amounts, this is oriented
+   * towards validating the standard Stellar operations.
+   *
+   * @param {string} value          the amount to validate
+   * @param {[boolean]} allowZero   whether or not zero is valid (default: no)
+   *
+   * @returns {boolean}
+   */
   static isValidAmount(value, allowZero = false) {
     if (typeof value !== 'string') {
       return false;
@@ -389,7 +409,7 @@ export class Operation {
       // < 0
       amount.isNegative() ||
       // > Max value
-      amount.times(ONE).isGreaterThan(new BigNumber(MAX_INT64).toString()) ||
+      amount.times(ONE).gt(new BigNumber(MAX_INT64).toString()) ||
       // Decimal places (max 7)
       amount.decimalPlaces() > 7 ||
       // NaN or Infinity
@@ -482,7 +502,6 @@ export class Operation {
     if (price.n && price.d) {
       xdrObject = new xdr.Price(price);
     } else {
-      price = new BigNumber(price);
       const approx = best_r(price);
       xdrObject = new xdr.Price({
         n: parseInt(approx[0], 10),
