@@ -1,5 +1,5 @@
 // Automatically generated on 2023-04-20T14:53:00-08:00
-import { Operation } from './index';
+import { Operation } from "./index";
 
 export {};
 
@@ -476,9 +476,11 @@ export namespace xdr {
       | "ledgerUpgradeBaseFee"
       | "ledgerUpgradeMaxTxSetSize"
       | "ledgerUpgradeBaseReserve"
+      | "ledgerUpgradeBasePercentageFee"
+      | "ledgerUpgradeMaxFee"
       | "ledgerUpgradeFlags";
 
-    readonly value: 1 | 2 | 3 | 4 | 5;
+    readonly value: 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
     static ledgerUpgradeVersion(): LedgerUpgradeType;
 
@@ -487,6 +489,10 @@ export namespace xdr {
     static ledgerUpgradeMaxTxSetSize(): LedgerUpgradeType;
 
     static ledgerUpgradeBaseReserve(): LedgerUpgradeType;
+
+    static ledgerUpgradeBasePercentageFee(): LedgerUpgradeType;
+
+    static ledgerUpgradeMaxFee(): LedgerUpgradeType;
 
     static ledgerUpgradeFlags(): LedgerUpgradeType;
   }
@@ -576,6 +582,7 @@ export namespace xdr {
       | "surveyRequest"
       | "surveyResponse"
       | "sendMore"
+      | "sendMoreExtended"
       | "floodAdvert"
       | "floodDemand";
 
@@ -597,6 +604,7 @@ export namespace xdr {
       | 14
       | 15
       | 16
+      | 20
       | 18
       | 19;
 
@@ -634,6 +642,8 @@ export namespace xdr {
 
     static sendMore(): MessageType;
 
+    static sendMoreExtended(): MessageType;
+
     static floodAdvert(): MessageType;
 
     static floodDemand(): MessageType;
@@ -645,6 +655,16 @@ export namespace xdr {
     readonly value: 0;
 
     static surveyTopology(): SurveyMessageCommandType;
+  }
+
+  class SurveyMessageResponseType {
+    readonly name: "surveyTopologyResponseV0" | "surveyTopologyResponseV1";
+
+    readonly value: 0 | 1;
+
+    static surveyTopologyResponseV0(): SurveyMessageResponseType;
+
+    static surveyTopologyResponseV1(): SurveyMessageResponseType;
   }
 
   class OperationType {
@@ -3078,6 +3098,8 @@ export namespace xdr {
       inflationSeq: number;
       idPool: Uint64;
       baseFee: number;
+      basePercentageFee: number;
+      maxFee: Uint64;
       baseReserve: number;
       maxTxSetSize: number;
       skipList: Buffer[];
@@ -3105,6 +3127,10 @@ export namespace xdr {
     idPool(value?: Uint64): Uint64;
 
     baseFee(value?: number): number;
+
+    basePercentageFee(value?: number): number;
+
+    maxFee(value?: Uint64): Uint64;
 
     baseReserve(value?: number): number;
 
@@ -3793,6 +3819,34 @@ export namespace xdr {
     static validateXDR(input: string, format: "hex" | "base64"): boolean;
   }
 
+  class SendMoreExtended {
+    constructor(attributes: { numMessages: number; numBytes: number });
+
+    numMessages(value?: number): number;
+
+    numBytes(value?: number): number;
+
+    toXDR(format?: "raw"): Buffer;
+
+    toXDR(format: "hex" | "base64"): string;
+
+    static read(io: Buffer): SendMoreExtended;
+
+    static write(value: SendMoreExtended, io: Buffer): void;
+
+    static isValid(value: SendMoreExtended): boolean;
+
+    static toXDR(value: SendMoreExtended): Buffer;
+
+    static fromXDR(input: Buffer, format?: "raw"): SendMoreExtended;
+
+    static fromXDR(input: string, format: "hex" | "base64"): SendMoreExtended;
+
+    static validateXDR(input: Buffer, format?: "raw"): boolean;
+
+    static validateXDR(input: string, format: "hex" | "base64"): boolean;
+  }
+
   class AuthCert {
     constructor(attributes: {
       pubkey: Curve25519Public;
@@ -4191,7 +4245,7 @@ export namespace xdr {
     static validateXDR(input: string, format: "hex" | "base64"): boolean;
   }
 
-  class TopologyResponseBody {
+  class TopologyResponseBodyV0 {
     constructor(attributes: {
       inboundPeers: PeerStats[];
       outboundPeers: PeerStats[];
@@ -4211,20 +4265,66 @@ export namespace xdr {
 
     toXDR(format: "hex" | "base64"): string;
 
-    static read(io: Buffer): TopologyResponseBody;
+    static read(io: Buffer): TopologyResponseBodyV0;
 
-    static write(value: TopologyResponseBody, io: Buffer): void;
+    static write(value: TopologyResponseBodyV0, io: Buffer): void;
 
-    static isValid(value: TopologyResponseBody): boolean;
+    static isValid(value: TopologyResponseBodyV0): boolean;
 
-    static toXDR(value: TopologyResponseBody): Buffer;
+    static toXDR(value: TopologyResponseBodyV0): Buffer;
 
-    static fromXDR(input: Buffer, format?: "raw"): TopologyResponseBody;
+    static fromXDR(input: Buffer, format?: "raw"): TopologyResponseBodyV0;
 
     static fromXDR(
       input: string,
       format: "hex" | "base64"
-    ): TopologyResponseBody;
+    ): TopologyResponseBodyV0;
+
+    static validateXDR(input: Buffer, format?: "raw"): boolean;
+
+    static validateXDR(input: string, format: "hex" | "base64"): boolean;
+  }
+
+  class TopologyResponseBodyV1 {
+    constructor(attributes: {
+      inboundPeers: PeerStats[];
+      outboundPeers: PeerStats[];
+      totalInboundPeerCount: number;
+      totalOutboundPeerCount: number;
+      maxInboundPeerCount: number;
+      maxOutboundPeerCount: number;
+    });
+
+    inboundPeers(value?: PeerStats[]): PeerStats[];
+
+    outboundPeers(value?: PeerStats[]): PeerStats[];
+
+    totalInboundPeerCount(value?: number): number;
+
+    totalOutboundPeerCount(value?: number): number;
+
+    maxInboundPeerCount(value?: number): number;
+
+    maxOutboundPeerCount(value?: number): number;
+
+    toXDR(format?: "raw"): Buffer;
+
+    toXDR(format: "hex" | "base64"): string;
+
+    static read(io: Buffer): TopologyResponseBodyV1;
+
+    static write(value: TopologyResponseBodyV1, io: Buffer): void;
+
+    static isValid(value: TopologyResponseBodyV1): boolean;
+
+    static toXDR(value: TopologyResponseBodyV1): Buffer;
+
+    static fromXDR(input: Buffer, format?: "raw"): TopologyResponseBodyV1;
+
+    static fromXDR(
+      input: string,
+      format: "hex" | "base64"
+    ): TopologyResponseBodyV1;
 
     static validateXDR(input: Buffer, format?: "raw"): boolean;
 
@@ -5321,7 +5421,7 @@ export namespace xdr {
   class TransactionV0 {
     constructor(attributes: {
       sourceAccountEd25519: Buffer;
-      fee: number;
+      fee: Uint64;
       seqNum: SequenceNumber;
       timeBounds: null | TimeBounds;
       memo: Memo;
@@ -5331,7 +5431,7 @@ export namespace xdr {
 
     sourceAccountEd25519(value?: Buffer): Buffer;
 
-    fee(value?: number): number;
+    fee(value?: Uint64): Uint64;
 
     seqNum(value?: SequenceNumber): SequenceNumber;
 
@@ -5401,7 +5501,7 @@ export namespace xdr {
   class Transaction {
     constructor(attributes: {
       sourceAccount: MuxedAccount;
-      fee: number;
+      fee: Uint64;
       seqNum: SequenceNumber;
       cond: Preconditions;
       memo: Memo;
@@ -5411,7 +5511,7 @@ export namespace xdr {
 
     sourceAccount(value?: MuxedAccount): MuxedAccount;
 
-    fee(value?: number): number;
+    fee(value?: Uint64): Uint64;
 
     seqNum(value?: SequenceNumber): SequenceNumber;
 
@@ -7051,6 +7151,10 @@ export namespace xdr {
 
     newBaseReserve(value?: number): number;
 
+    newBasePercentageFee(value?: number): number;
+
+    newMaxFee(value?: Uint64): Uint64;
+
     newFlags(value?: number): number;
 
     static ledgerUpgradeVersion(value: number): LedgerUpgrade;
@@ -7061,9 +7165,13 @@ export namespace xdr {
 
     static ledgerUpgradeBaseReserve(value: number): LedgerUpgrade;
 
+    static ledgerUpgradeBasePercentageFee(value: number): LedgerUpgrade;
+
+    static ledgerUpgradeMaxFee(value: Uint64): LedgerUpgrade;
+
     static ledgerUpgradeFlags(value: number): LedgerUpgrade;
 
-    value(): number | number | number | number | number;
+    value(): number | number | number | number | number | Uint64 | number;
 
     toXDR(format?: "raw"): Buffer;
 
@@ -7532,13 +7640,25 @@ export namespace xdr {
   }
 
   class SurveyResponseBody {
-    switch(): SurveyMessageCommandType;
+    switch(): SurveyMessageResponseType;
 
-    topologyResponseBody(value?: TopologyResponseBody): TopologyResponseBody;
+    topologyResponseBodyV0(
+      value?: TopologyResponseBodyV0
+    ): TopologyResponseBodyV0;
 
-    static surveyTopology(value: TopologyResponseBody): SurveyResponseBody;
+    topologyResponseBodyV1(
+      value?: TopologyResponseBodyV1
+    ): TopologyResponseBodyV1;
 
-    value(): TopologyResponseBody;
+    static surveyTopologyResponseV0(
+      value: TopologyResponseBodyV0
+    ): SurveyResponseBody;
+
+    static surveyTopologyResponseV1(
+      value: TopologyResponseBodyV1
+    ): SurveyResponseBody;
+
+    value(): TopologyResponseBodyV0 | TopologyResponseBodyV1;
 
     toXDR(format?: "raw"): Buffer;
 
@@ -7602,6 +7722,8 @@ export namespace xdr {
 
     sendMoreMessage(value?: SendMore): SendMore;
 
+    sendMoreExtendedMessage(value?: SendMoreExtended): SendMoreExtended;
+
     floodAdvert(value?: FloodAdvert): FloodAdvert;
 
     floodDemand(value?: FloodDemand): FloodDemand;
@@ -7640,6 +7762,8 @@ export namespace xdr {
 
     static sendMore(value: SendMore): StellarMessage;
 
+    static sendMoreExtended(value: SendMoreExtended): StellarMessage;
+
     static floodAdvert(value: FloodAdvert): StellarMessage;
 
     static floodDemand(value: FloodDemand): StellarMessage;
@@ -7661,6 +7785,7 @@ export namespace xdr {
       | ScpEnvelope
       | number
       | SendMore
+      | SendMoreExtended
       | FloodAdvert
       | FloodDemand
       | void;
