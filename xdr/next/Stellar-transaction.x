@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the COPYING file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+%#include "xdr/Stellar-contract.h"
 %#include "xdr/Stellar-ledger-entries.h"
 
 namespace stellar
@@ -32,6 +33,13 @@ struct DecoratedSignature
     Signature signature; // actual signature
 };
 
+// Ledger key sets touched by a smart contract transaction.
+struct LedgerFootprint
+{
+    LedgerKey readOnly<>;
+    LedgerKey readWrite<>;
+};
+
 enum OperationType
 {
     CREATE_ACCOUNT = 0,
@@ -57,7 +65,8 @@ enum OperationType
     CLAWBACK_CLAIMABLE_BALANCE = 20,
     SET_TRUST_LINE_FLAGS = 21,
     LIQUIDITY_POOL_DEPOSIT = 22,
-    LIQUIDITY_POOL_WITHDRAW = 23
+    LIQUIDITY_POOL_WITHDRAW = 23,
+    INVOKE_HOST_FUNCTION = 24
 };
 
 /* CreateAccount
@@ -445,10 +454,10 @@ const LIQUIDITY_POOL_FEE_V18 = 30;
 struct LiquidityPoolDepositOp
 {
     PoolID liquidityPoolID;
-    int64 maxAmountA;     // maximum amount of first asset to deposit
-    int64 maxAmountB;     // maximum amount of second asset to deposit
-    Price minPrice;       // minimum depositA/depositB
-    Price maxPrice;       // maximum depositA/depositB
+    int64 maxAmountA; // maximum amount of first asset to deposit
+    int64 maxAmountB; // maximum amount of second asset to deposit
+    Price minPrice;   // minimum depositA/depositB
+    Price maxPrice;   // maximum depositA/depositB
 };
 
 /* Withdraw assets from a liquidity pool
@@ -460,9 +469,97 @@ struct LiquidityPoolDepositOp
 struct LiquidityPoolWithdrawOp
 {
     PoolID liquidityPoolID;
-    int64 amount;         // amount of pool shares to withdraw
-    int64 minAmountA;     // minimum amount of first asset to withdraw
-    int64 minAmountB;     // minimum amount of second asset to withdraw
+    int64 amount;     // amount of pool shares to withdraw
+    int64 minAmountA; // minimum amount of first asset to withdraw
+    int64 minAmountB; // minimum amount of second asset to withdraw
+};
+
+enum HostFunctionType
+{
+    HOST_FUNCTION_TYPE_INVOKE_CONTRACT = 0,
+    HOST_FUNCTION_TYPE_CREATE_CONTRACT = 1,
+    HOST_FUNCTION_TYPE_INSTALL_CONTRACT_CODE = 2
+};
+
+enum ContractIDType
+{
+    CONTRACT_ID_FROM_SOURCE_ACCOUNT = 0,
+    CONTRACT_ID_FROM_ED25519_PUBLIC_KEY = 1,
+    CONTRACT_ID_FROM_ASSET = 2
+};
+ 
+enum ContractIDPublicKeyType
+{
+    CONTRACT_ID_PUBLIC_KEY_SOURCE_ACCOUNT = 0,
+    CONTRACT_ID_PUBLIC_KEY_ED25519 = 1
+};
+
+struct InstallContractCodeArgs
+{
+    opaque code<SCVAL_LIMIT>;
+};
+
+union ContractID switch (ContractIDType type)
+{
+case CONTRACT_ID_FROM_SOURCE_ACCOUNT:
+    uint256 salt;
+case CONTRACT_ID_FROM_ED25519_PUBLIC_KEY:
+    struct 
+    {
+        uint256 key;
+        Signature signature;
+        uint256 salt;
+    } fromEd25519PublicKey;
+case CONTRACT_ID_FROM_ASSET:
+    Asset asset;
+};
+
+struct CreateContractArgs
+{
+    ContractID contractID;
+    SCContractExecutable source;
+};
+
+union HostFunction switch (HostFunctionType type)
+{
+case HOST_FUNCTION_TYPE_INVOKE_CONTRACT:
+    SCVec invokeArgs;
+case HOST_FUNCTION_TYPE_CREATE_CONTRACT:
+    CreateContractArgs createContractArgs;
+case HOST_FUNCTION_TYPE_INSTALL_CONTRACT_CODE:
+    InstallContractCodeArgs installContractCodeArgs;
+};
+
+struct AuthorizedInvocation
+{
+    Hash contractID;
+    SCSymbol functionName;
+    SCVec args;
+    AuthorizedInvocation subInvocations<>;
+};
+
+struct AddressWithNonce
+{
+    SCAddress address;
+    uint64 nonce;
+};
+
+struct ContractAuth
+{
+    AddressWithNonce* addressWithNonce; // not present for invoker
+    AuthorizedInvocation rootInvocation;
+    SCVec signatureArgs;
+};
+
+struct InvokeHostFunctionOp
+{
+    // The host function to invoke
+    HostFunction function;
+    // The footprint for this invocation
+    LedgerFootprint footprint;
+    // Per-address authorizations for this host fn
+    // Currently only supported for INVOKE_CONTRACT function
+    ContractAuth auth<>;
 };
 
 /* An operation is the lowest unit of work that a transaction does */
@@ -523,11 +620,13 @@ struct Operation
         LiquidityPoolDepositOp liquidityPoolDepositOp;
     case LIQUIDITY_POOL_WITHDRAW:
         LiquidityPoolWithdrawOp liquidityPoolWithdrawOp;
+    case INVOKE_HOST_FUNCTION:
+        InvokeHostFunctionOp invokeHostFunctionOp;
     }
     body;
 };
 
-union OperationID switch (EnvelopeType type)
+union HashIDPreimage switch (EnvelopeType type)
 {
 case ENVELOPE_TYPE_OP_ID:
     struct
@@ -535,7 +634,7 @@ case ENVELOPE_TYPE_OP_ID:
         AccountID sourceAccount;
         SequenceNumber seqNum;
         uint32 opNum;
-    } id;
+    } operationID;
 case ENVELOPE_TYPE_POOL_REVOKE_OP_ID:
     struct
     {
@@ -544,7 +643,48 @@ case ENVELOPE_TYPE_POOL_REVOKE_OP_ID:
         uint32 opNum;
         PoolID liquidityPoolID;
         Asset asset;
-    } revokeId;
+    } revokeID;
+case ENVELOPE_TYPE_CONTRACT_ID_FROM_ED25519:
+    struct
+    {
+        Hash networkID;
+        uint256 ed25519;
+        uint256 salt;
+    } ed25519ContractID;
+case ENVELOPE_TYPE_CONTRACT_ID_FROM_CONTRACT:
+    struct
+    {
+        Hash networkID;
+        Hash contractID;
+        uint256 salt;
+    } contractID;
+case ENVELOPE_TYPE_CONTRACT_ID_FROM_ASSET:
+    struct
+    {
+        Hash networkID;
+        Asset asset;
+    } fromAsset;
+case ENVELOPE_TYPE_CONTRACT_ID_FROM_SOURCE_ACCOUNT:
+    struct
+    {
+        Hash networkID;
+        AccountID sourceAccount;
+        uint256 salt;
+    } sourceAccountContractID;
+case ENVELOPE_TYPE_CREATE_CONTRACT_ARGS:
+    struct
+    {
+        Hash networkID;
+        SCContractExecutable source;
+        uint256 salt;
+    } createContractArgs;
+case ENVELOPE_TYPE_CONTRACT_AUTH:
+    struct
+    {
+        Hash networkID;
+        uint64 nonce;
+        AuthorizedInvocation invocation;
+    } contractAuth;
 };
 
 enum MemoType
@@ -576,6 +716,62 @@ struct TimeBounds
     TimePoint maxTime; // 0 here means no maxTime
 };
 
+struct LedgerBounds
+{
+    uint32 minLedger;
+    uint32 maxLedger; // 0 here means no maxLedger
+};
+
+struct PreconditionsV2
+{
+    TimeBounds* timeBounds;
+
+    // Transaction only valid for ledger numbers n such that
+    // minLedger <= n < maxLedger (if maxLedger == 0, then
+    // only minLedger is checked)
+    LedgerBounds* ledgerBounds;
+
+    // If NULL, only valid when sourceAccount's sequence number
+    // is seqNum - 1.  Otherwise, valid when sourceAccount's
+    // sequence number n satisfies minSeqNum <= n < tx.seqNum.
+    // Note that after execution the account's sequence number
+    // is always raised to tx.seqNum, and a transaction is not
+    // valid if tx.seqNum is too high to ensure replay protection.
+    SequenceNumber* minSeqNum;
+
+    // For the transaction to be valid, the current ledger time must
+    // be at least minSeqAge greater than sourceAccount's seqTime.
+    Duration minSeqAge;
+
+    // For the transaction to be valid, the current ledger number
+    // must be at least minSeqLedgerGap greater than sourceAccount's
+    // seqLedger.
+    uint32 minSeqLedgerGap;
+
+    // For the transaction to be valid, there must be a signature
+    // corresponding to every Signer in this array, even if the
+    // signature is not otherwise required by the sourceAccount or
+    // operations.
+    SignerKey extraSigners<2>;
+};
+
+enum PreconditionType
+{
+    PRECOND_NONE = 0,
+    PRECOND_TIME = 1,
+    PRECOND_V2 = 2
+};
+
+union Preconditions switch (PreconditionType type)
+{
+case PRECOND_NONE:
+    void;
+case PRECOND_TIME:
+    TimeBounds timeBounds;
+case PRECOND_V2:
+    PreconditionsV2 v2;
+};
+
 // maximum number of operations per transaction
 const MAX_OPS_PER_TX = 100;
 
@@ -588,7 +784,7 @@ const MAX_OPS_PER_TX = 100;
 struct TransactionV0
 {
     uint256 sourceAccountEd25519;
-    uint64 fee;
+    uint32 fee;
     SequenceNumber seqNum;
     TimeBounds* timeBounds;
     Memo memo;
@@ -622,13 +818,13 @@ struct Transaction
     MuxedAccount sourceAccount;
 
     // the fee the sourceAccount will pay
-    uint64 fee;
+    uint32 fee;
 
     // sequence number to consume in the account
     SequenceNumber seqNum;
 
-    // validity range (inclusive) for the last ledger close time
-    TimeBounds* timeBounds;
+    // validity conditions
+    Preconditions cond;
 
     Memo memo;
 
@@ -791,7 +987,10 @@ union CreateAccountResult switch (CreateAccountResultCode code)
 {
 case CREATE_ACCOUNT_SUCCESS:
     void;
-default:
+case CREATE_ACCOUNT_MALFORMED:
+case CREATE_ACCOUNT_UNDERFUNDED:
+case CREATE_ACCOUNT_LOW_RESERVE:
+case CREATE_ACCOUNT_ALREADY_EXIST:
     void;
 };
 
@@ -818,7 +1017,15 @@ union PaymentResult switch (PaymentResultCode code)
 {
 case PAYMENT_SUCCESS:
     void;
-default:
+case PAYMENT_MALFORMED:
+case PAYMENT_UNDERFUNDED:
+case PAYMENT_SRC_NO_TRUST:
+case PAYMENT_SRC_NOT_AUTHORIZED:
+case PAYMENT_NO_DESTINATION:
+case PAYMENT_NO_TRUST:
+case PAYMENT_NOT_AUTHORIZED:
+case PAYMENT_LINE_FULL:
+case PAYMENT_NO_ISSUER:
     void;
 };
 
@@ -869,9 +1076,20 @@ case PATH_PAYMENT_STRICT_RECEIVE_SUCCESS:
         ClaimAtom offers<>;
         SimplePaymentResult last;
     } success;
+case PATH_PAYMENT_STRICT_RECEIVE_MALFORMED:
+case PATH_PAYMENT_STRICT_RECEIVE_UNDERFUNDED:
+case PATH_PAYMENT_STRICT_RECEIVE_SRC_NO_TRUST:
+case PATH_PAYMENT_STRICT_RECEIVE_SRC_NOT_AUTHORIZED:
+case PATH_PAYMENT_STRICT_RECEIVE_NO_DESTINATION:
+case PATH_PAYMENT_STRICT_RECEIVE_NO_TRUST:
+case PATH_PAYMENT_STRICT_RECEIVE_NOT_AUTHORIZED:
+case PATH_PAYMENT_STRICT_RECEIVE_LINE_FULL:
+    void;
 case PATH_PAYMENT_STRICT_RECEIVE_NO_ISSUER:
     Asset noIssuer; // the asset that caused the error
-default:
+case PATH_PAYMENT_STRICT_RECEIVE_TOO_FEW_OFFERS:
+case PATH_PAYMENT_STRICT_RECEIVE_OFFER_CROSS_SELF:
+case PATH_PAYMENT_STRICT_RECEIVE_OVER_SENDMAX:
     void;
 };
 
@@ -913,9 +1131,20 @@ case PATH_PAYMENT_STRICT_SEND_SUCCESS:
         ClaimAtom offers<>;
         SimplePaymentResult last;
     } success;
+case PATH_PAYMENT_STRICT_SEND_MALFORMED:
+case PATH_PAYMENT_STRICT_SEND_UNDERFUNDED:
+case PATH_PAYMENT_STRICT_SEND_SRC_NO_TRUST:
+case PATH_PAYMENT_STRICT_SEND_SRC_NOT_AUTHORIZED:
+case PATH_PAYMENT_STRICT_SEND_NO_DESTINATION:
+case PATH_PAYMENT_STRICT_SEND_NO_TRUST:
+case PATH_PAYMENT_STRICT_SEND_NOT_AUTHORIZED:
+case PATH_PAYMENT_STRICT_SEND_LINE_FULL:
+    void;
 case PATH_PAYMENT_STRICT_SEND_NO_ISSUER:
     Asset noIssuer; // the asset that caused the error
-default:
+case PATH_PAYMENT_STRICT_SEND_TOO_FEW_OFFERS:
+case PATH_PAYMENT_STRICT_SEND_OFFER_CROSS_SELF:
+case PATH_PAYMENT_STRICT_SEND_UNDER_DESTMIN:
     void;
 };
 
@@ -965,7 +1194,7 @@ struct ManageOfferSuccessResult
     case MANAGE_OFFER_CREATED:
     case MANAGE_OFFER_UPDATED:
         OfferEntry offer;
-    default:
+    case MANAGE_OFFER_DELETED:
         void;
     }
     offer;
@@ -975,7 +1204,18 @@ union ManageSellOfferResult switch (ManageSellOfferResultCode code)
 {
 case MANAGE_SELL_OFFER_SUCCESS:
     ManageOfferSuccessResult success;
-default:
+case MANAGE_SELL_OFFER_MALFORMED:
+case MANAGE_SELL_OFFER_SELL_NO_TRUST:
+case MANAGE_SELL_OFFER_BUY_NO_TRUST:
+case MANAGE_SELL_OFFER_SELL_NOT_AUTHORIZED:
+case MANAGE_SELL_OFFER_BUY_NOT_AUTHORIZED:
+case MANAGE_SELL_OFFER_LINE_FULL:
+case MANAGE_SELL_OFFER_UNDERFUNDED:
+case MANAGE_SELL_OFFER_CROSS_SELF:
+case MANAGE_SELL_OFFER_SELL_NO_ISSUER:
+case MANAGE_SELL_OFFER_BUY_NO_ISSUER:
+case MANAGE_SELL_OFFER_NOT_FOUND:
+case MANAGE_SELL_OFFER_LOW_RESERVE:
     void;
 };
 
@@ -1009,7 +1249,18 @@ union ManageBuyOfferResult switch (ManageBuyOfferResultCode code)
 {
 case MANAGE_BUY_OFFER_SUCCESS:
     ManageOfferSuccessResult success;
-default:
+case MANAGE_BUY_OFFER_MALFORMED:
+case MANAGE_BUY_OFFER_SELL_NO_TRUST:
+case MANAGE_BUY_OFFER_BUY_NO_TRUST:
+case MANAGE_BUY_OFFER_SELL_NOT_AUTHORIZED:
+case MANAGE_BUY_OFFER_BUY_NOT_AUTHORIZED:
+case MANAGE_BUY_OFFER_LINE_FULL:
+case MANAGE_BUY_OFFER_UNDERFUNDED:
+case MANAGE_BUY_OFFER_CROSS_SELF:
+case MANAGE_BUY_OFFER_SELL_NO_ISSUER:
+case MANAGE_BUY_OFFER_BUY_NO_ISSUER:
+case MANAGE_BUY_OFFER_NOT_FOUND:
+case MANAGE_BUY_OFFER_LOW_RESERVE:
     void;
 };
 
@@ -1037,7 +1288,16 @@ union SetOptionsResult switch (SetOptionsResultCode code)
 {
 case SET_OPTIONS_SUCCESS:
     void;
-default:
+case SET_OPTIONS_LOW_RESERVE:
+case SET_OPTIONS_TOO_MANY_SIGNERS:
+case SET_OPTIONS_BAD_FLAGS:
+case SET_OPTIONS_INVALID_INFLATION:
+case SET_OPTIONS_CANT_CHANGE:
+case SET_OPTIONS_UNKNOWN_FLAG:
+case SET_OPTIONS_THRESHOLD_OUT_OF_RANGE:
+case SET_OPTIONS_BAD_SIGNER:
+case SET_OPTIONS_INVALID_HOME_DOMAIN:
+case SET_OPTIONS_AUTH_REVOCABLE_REQUIRED:
     void;
 };
 
@@ -1054,17 +1314,26 @@ enum ChangeTrustResultCode
                                      // cannot create with a limit of 0
     CHANGE_TRUST_LOW_RESERVE =
         -4, // not enough funds to create a new trust line,
-    CHANGE_TRUST_SELF_NOT_ALLOWED = -5, // trusting self is not allowed
+    CHANGE_TRUST_SELF_NOT_ALLOWED = -5,   // trusting self is not allowed
     CHANGE_TRUST_TRUST_LINE_MISSING = -6, // Asset trustline is missing for pool
-    CHANGE_TRUST_CANNOT_DELETE = -7, // Asset trustline is still referenced in a pool
-    CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES = -8 // Asset trustline is deauthorized
+    CHANGE_TRUST_CANNOT_DELETE =
+        -7, // Asset trustline is still referenced in a pool
+    CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES =
+        -8 // Asset trustline is deauthorized
 };
 
 union ChangeTrustResult switch (ChangeTrustResultCode code)
 {
 case CHANGE_TRUST_SUCCESS:
     void;
-default:
+case CHANGE_TRUST_MALFORMED:
+case CHANGE_TRUST_NO_ISSUER:
+case CHANGE_TRUST_INVALID_LIMIT:
+case CHANGE_TRUST_LOW_RESERVE:
+case CHANGE_TRUST_SELF_NOT_ALLOWED:
+case CHANGE_TRUST_TRUST_LINE_MISSING:
+case CHANGE_TRUST_CANNOT_DELETE:
+case CHANGE_TRUST_NOT_AUTH_MAINTAIN_LIABILITIES:
     void;
 };
 
@@ -1079,17 +1348,22 @@ enum AllowTrustResultCode
     ALLOW_TRUST_NO_TRUST_LINE = -2, // trustor does not have a trustline
                                     // source account does not require trust
     ALLOW_TRUST_TRUST_NOT_REQUIRED = -3,
-    ALLOW_TRUST_CANT_REVOKE = -4,     // source account can't revoke trust,
+    ALLOW_TRUST_CANT_REVOKE = -4,      // source account can't revoke trust,
     ALLOW_TRUST_SELF_NOT_ALLOWED = -5, // trusting self is not allowed
-    ALLOW_TRUST_LOW_RESERVE = -6 // claimable balances can't be created
-                                 // on revoke due to low reserves 
+    ALLOW_TRUST_LOW_RESERVE = -6       // claimable balances can't be created
+                                       // on revoke due to low reserves
 };
 
 union AllowTrustResult switch (AllowTrustResultCode code)
 {
 case ALLOW_TRUST_SUCCESS:
     void;
-default:
+case ALLOW_TRUST_MALFORMED:
+case ALLOW_TRUST_NO_TRUST_LINE:
+case ALLOW_TRUST_TRUST_NOT_REQUIRED:
+case ALLOW_TRUST_CANT_REVOKE:
+case ALLOW_TRUST_SELF_NOT_ALLOWED:
+case ALLOW_TRUST_LOW_RESERVE:
     void;
 };
 
@@ -1114,7 +1388,13 @@ union AccountMergeResult switch (AccountMergeResultCode code)
 {
 case ACCOUNT_MERGE_SUCCESS:
     int64 sourceAccountBalance; // how much got transferred from source account
-default:
+case ACCOUNT_MERGE_MALFORMED:
+case ACCOUNT_MERGE_NO_ACCOUNT:
+case ACCOUNT_MERGE_IMMUTABLE_SET:
+case ACCOUNT_MERGE_HAS_SUB_ENTRIES:
+case ACCOUNT_MERGE_SEQNUM_TOO_FAR:
+case ACCOUNT_MERGE_DEST_FULL:
+case ACCOUNT_MERGE_IS_SPONSOR:
     void;
 };
 
@@ -1138,7 +1418,7 @@ union InflationResult switch (InflationResultCode code)
 {
 case INFLATION_SUCCESS:
     InflationPayout payouts<>;
-default:
+case INFLATION_NOT_TIME:
     void;
 };
 
@@ -1161,7 +1441,10 @@ union ManageDataResult switch (ManageDataResultCode code)
 {
 case MANAGE_DATA_SUCCESS:
     void;
-default:
+case MANAGE_DATA_NOT_SUPPORTED_YET:
+case MANAGE_DATA_NAME_NOT_FOUND:
+case MANAGE_DATA_LOW_RESERVE:
+case MANAGE_DATA_INVALID_NAME:
     void;
 };
 
@@ -1179,7 +1462,7 @@ union BumpSequenceResult switch (BumpSequenceResultCode code)
 {
 case BUMP_SEQUENCE_SUCCESS:
     void;
-default:
+case BUMP_SEQUENCE_BAD_SEQ:
     void;
 };
 
@@ -1200,7 +1483,11 @@ union CreateClaimableBalanceResult switch (
 {
 case CREATE_CLAIMABLE_BALANCE_SUCCESS:
     ClaimableBalanceID balanceID;
-default:
+case CREATE_CLAIMABLE_BALANCE_MALFORMED:
+case CREATE_CLAIMABLE_BALANCE_LOW_RESERVE:
+case CREATE_CLAIMABLE_BALANCE_NO_TRUST:
+case CREATE_CLAIMABLE_BALANCE_NOT_AUTHORIZED:
+case CREATE_CLAIMABLE_BALANCE_UNDERFUNDED:
     void;
 };
 
@@ -1214,14 +1501,17 @@ enum ClaimClaimableBalanceResultCode
     CLAIM_CLAIMABLE_BALANCE_LINE_FULL = -3,
     CLAIM_CLAIMABLE_BALANCE_NO_TRUST = -4,
     CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED = -5
-
 };
 
 union ClaimClaimableBalanceResult switch (ClaimClaimableBalanceResultCode code)
 {
 case CLAIM_CLAIMABLE_BALANCE_SUCCESS:
     void;
-default:
+case CLAIM_CLAIMABLE_BALANCE_DOES_NOT_EXIST:
+case CLAIM_CLAIMABLE_BALANCE_CANNOT_CLAIM:
+case CLAIM_CLAIMABLE_BALANCE_LINE_FULL:
+case CLAIM_CLAIMABLE_BALANCE_NO_TRUST:
+case CLAIM_CLAIMABLE_BALANCE_NOT_AUTHORIZED:
     void;
 };
 
@@ -1243,7 +1533,9 @@ union BeginSponsoringFutureReservesResult switch (
 {
 case BEGIN_SPONSORING_FUTURE_RESERVES_SUCCESS:
     void;
-default:
+case BEGIN_SPONSORING_FUTURE_RESERVES_MALFORMED:
+case BEGIN_SPONSORING_FUTURE_RESERVES_ALREADY_SPONSORED:
+case BEGIN_SPONSORING_FUTURE_RESERVES_RECURSIVE:
     void;
 };
 
@@ -1263,7 +1555,7 @@ union EndSponsoringFutureReservesResult switch (
 {
 case END_SPONSORING_FUTURE_RESERVES_SUCCESS:
     void;
-default:
+case END_SPONSORING_FUTURE_RESERVES_NOT_SPONSORED:
     void;
 };
 
@@ -1286,7 +1578,11 @@ union RevokeSponsorshipResult switch (RevokeSponsorshipResultCode code)
 {
 case REVOKE_SPONSORSHIP_SUCCESS:
     void;
-default:
+case REVOKE_SPONSORSHIP_DOES_NOT_EXIST:
+case REVOKE_SPONSORSHIP_NOT_SPONSOR:
+case REVOKE_SPONSORSHIP_LOW_RESERVE:
+case REVOKE_SPONSORSHIP_ONLY_TRANSFERABLE:
+case REVOKE_SPONSORSHIP_MALFORMED:
     void;
 };
 
@@ -1308,7 +1604,10 @@ union ClawbackResult switch (ClawbackResultCode code)
 {
 case CLAWBACK_SUCCESS:
     void;
-default:
+case CLAWBACK_MALFORMED:
+case CLAWBACK_NOT_CLAWBACK_ENABLED:
+case CLAWBACK_NO_TRUST:
+case CLAWBACK_UNDERFUNDED:
     void;
 };
 
@@ -1330,7 +1629,9 @@ union ClawbackClaimableBalanceResult switch (
 {
 case CLAWBACK_CLAIMABLE_BALANCE_SUCCESS:
     void;
-default:
+case CLAWBACK_CLAIMABLE_BALANCE_DOES_NOT_EXIST:
+case CLAWBACK_CLAIMABLE_BALANCE_NOT_ISSUER:
+case CLAWBACK_CLAIMABLE_BALANCE_NOT_CLAWBACK_ENABLED:
     void;
 };
 
@@ -1354,7 +1655,11 @@ union SetTrustLineFlagsResult switch (SetTrustLineFlagsResultCode code)
 {
 case SET_TRUST_LINE_FLAGS_SUCCESS:
     void;
-default:
+case SET_TRUST_LINE_FLAGS_MALFORMED:
+case SET_TRUST_LINE_FLAGS_NO_TRUST_LINE:
+case SET_TRUST_LINE_FLAGS_CANT_REVOKE:
+case SET_TRUST_LINE_FLAGS_INVALID_STATE:
+case SET_TRUST_LINE_FLAGS_LOW_RESERVE:
     void;
 };
 
@@ -1379,12 +1684,17 @@ enum LiquidityPoolDepositResultCode
     LIQUIDITY_POOL_DEPOSIT_POOL_FULL = -7       // pool reserves are full
 };
 
-union LiquidityPoolDepositResult switch (
-    LiquidityPoolDepositResultCode code)
+union LiquidityPoolDepositResult switch (LiquidityPoolDepositResultCode code)
 {
 case LIQUIDITY_POOL_DEPOSIT_SUCCESS:
     void;
-default:
+case LIQUIDITY_POOL_DEPOSIT_MALFORMED:
+case LIQUIDITY_POOL_DEPOSIT_NO_TRUST:
+case LIQUIDITY_POOL_DEPOSIT_NOT_AUTHORIZED:
+case LIQUIDITY_POOL_DEPOSIT_UNDERFUNDED:
+case LIQUIDITY_POOL_DEPOSIT_LINE_FULL:
+case LIQUIDITY_POOL_DEPOSIT_BAD_PRICE:
+case LIQUIDITY_POOL_DEPOSIT_POOL_FULL:
     void;
 };
 
@@ -1396,25 +1706,46 @@ enum LiquidityPoolWithdrawResultCode
     LIQUIDITY_POOL_WITHDRAW_SUCCESS = 0,
 
     // codes considered as "failure" for the operation
-    LIQUIDITY_POOL_WITHDRAW_MALFORMED = -1,      // bad input
-    LIQUIDITY_POOL_WITHDRAW_NO_TRUST = -2,       // no trust line for one of the
-                                                 // assets
-    LIQUIDITY_POOL_WITHDRAW_UNDERFUNDED = -3,    // not enough balance of the
-                                                 // pool share
-    LIQUIDITY_POOL_WITHDRAW_LINE_FULL = -4,      // would go above limit for one
-                                                 // of the assets
-    LIQUIDITY_POOL_WITHDRAW_UNDER_MINIMUM = -5   // didn't withdraw enough
+    LIQUIDITY_POOL_WITHDRAW_MALFORMED = -1,    // bad input
+    LIQUIDITY_POOL_WITHDRAW_NO_TRUST = -2,     // no trust line for one of the
+                                               // assets
+    LIQUIDITY_POOL_WITHDRAW_UNDERFUNDED = -3,  // not enough balance of the
+                                               // pool share
+    LIQUIDITY_POOL_WITHDRAW_LINE_FULL = -4,    // would go above limit for one
+                                               // of the assets
+    LIQUIDITY_POOL_WITHDRAW_UNDER_MINIMUM = -5 // didn't withdraw enough
 };
 
-union LiquidityPoolWithdrawResult switch (
-    LiquidityPoolWithdrawResultCode code)
+union LiquidityPoolWithdrawResult switch (LiquidityPoolWithdrawResultCode code)
 {
 case LIQUIDITY_POOL_WITHDRAW_SUCCESS:
     void;
-default:
+case LIQUIDITY_POOL_WITHDRAW_MALFORMED:
+case LIQUIDITY_POOL_WITHDRAW_NO_TRUST:
+case LIQUIDITY_POOL_WITHDRAW_UNDERFUNDED:
+case LIQUIDITY_POOL_WITHDRAW_LINE_FULL:
+case LIQUIDITY_POOL_WITHDRAW_UNDER_MINIMUM:
     void;
 };
 
+enum InvokeHostFunctionResultCode
+{
+    // codes considered as "success" for the operation
+    INVOKE_HOST_FUNCTION_SUCCESS = 0,
+
+    // codes considered as "failure" for the operation
+    INVOKE_HOST_FUNCTION_MALFORMED = -1,
+    INVOKE_HOST_FUNCTION_TRAPPED = -2
+};
+
+union InvokeHostFunctionResult switch (InvokeHostFunctionResultCode code)
+{
+case INVOKE_HOST_FUNCTION_SUCCESS:
+    SCVal success;
+case INVOKE_HOST_FUNCTION_MALFORMED:
+case INVOKE_HOST_FUNCTION_TRAPPED:
+    void;
+};
 
 /* High level Operation Result */
 enum OperationResultCode
@@ -1482,9 +1813,16 @@ case opINNER:
         LiquidityPoolDepositResult liquidityPoolDepositResult;
     case LIQUIDITY_POOL_WITHDRAW:
         LiquidityPoolWithdrawResult liquidityPoolWithdrawResult;
+    case INVOKE_HOST_FUNCTION:
+        InvokeHostFunctionResult invokeHostFunctionResult;
     }
     tr;
-default:
+case opBAD_AUTH:
+case opNO_ACCOUNT:
+case opNOT_SUPPORTED:
+case opTOO_MANY_SUBENTRIES:
+case opEXCEEDED_WORK_LIMIT:
+case opTOO_MANY_SPONSORING:
     void;
 };
 
@@ -1509,7 +1847,10 @@ enum TransactionResultCode
 
     txNOT_SUPPORTED = -12,         // transaction type not supported
     txFEE_BUMP_INNER_FAILED = -13, // fee bump inner transaction failed
-    txBAD_SPONSORSHIP = -14        // sponsorship not confirmed
+    txBAD_SPONSORSHIP = -14,       // sponsorship not confirmed
+    txBAD_MIN_SEQ_AGE_OR_GAP =
+        -15, // minSeqAge or minSeqLedgerGap conditions not met
+    txMALFORMED = -16 // precondition is invalid
 };
 
 // InnerTransactionResult must be binary compatible with TransactionResult
@@ -1538,6 +1879,8 @@ struct InnerTransactionResult
     case txNOT_SUPPORTED:
     // txFEE_BUMP_INNER_FAILED is not included
     case txBAD_SPONSORSHIP:
+    case txBAD_MIN_SEQ_AGE_OR_GAP:
+    case txMALFORMED:
         void;
     }
     result;
@@ -1569,7 +1912,21 @@ struct TransactionResult
     case txSUCCESS:
     case txFAILED:
         OperationResult results<>;
-    default:
+    case txTOO_EARLY:
+    case txTOO_LATE:
+    case txMISSING_OPERATION:
+    case txBAD_SEQ:
+    case txBAD_AUTH:
+    case txINSUFFICIENT_BALANCE:
+    case txNO_ACCOUNT:
+    case txINSUFFICIENT_FEE:
+    case txBAD_AUTH_EXTRA:
+    case txINTERNAL_ERROR:
+    case txNOT_SUPPORTED:
+    // case txFEE_BUMP_INNER_FAILED: handled above
+    case txBAD_SPONSORSHIP:
+    case txBAD_MIN_SEQ_AGE_OR_GAP:
+    case txMALFORMED:
         void;
     }
     result;

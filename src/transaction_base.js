@@ -1,4 +1,4 @@
-import xdr from './generated/stellar-xdr_generated';
+import xdr from './xdr';
 import { hash } from './hashing';
 import { Keypair } from './keypair';
 
@@ -156,6 +156,19 @@ export class TransactionBase {
         signature: signatureBuffer
       })
     );
+  }
+
+  /**
+   * Add a decorated signature directly to the transaction envelope.
+   *
+   * @param {xdr.DecoratedSignature} signature    raw signature to add
+   * @returns {void}
+   *
+   * @see Keypair.signDecorated
+   * @see Keypair.signPayloadDecorated
+   */
+  addDecoratedSignature(signature) {
+    this.signatures.push(signature);
   }
 
   /**

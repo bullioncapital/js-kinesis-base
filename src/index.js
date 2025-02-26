@@ -1,5 +1,8 @@
 /* eslint-disable import/no-import-module-exports */
-import xdr from './generated/stellar-xdr_generated';
+import BigNumber from 'bignumber.js';
+import xdr from './xdr';
+
+BigNumber.DEBUG = true; // gives us exceptions on bad constructor values
 
 export { xdr };
 export { hash } from './hashing';
@@ -34,6 +37,7 @@ export { MuxedAccount } from './muxed_account';
 export { Claimant } from './claimant';
 export { Networks } from './network';
 export { StrKey } from './strkey';
+export { SignerKey } from './signerkey';
 export {
   decodeAddressToMuxedAccount,
   encodeMuxedAccountToAddress,

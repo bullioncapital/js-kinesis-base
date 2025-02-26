@@ -4,6 +4,165 @@
 ## Unreleased
 
 
+## [v9.0.0](https://github.com/stellar/js-stellar-base/compare/v8.2.2..v9.0.0)
+
+This is a large update and the following changelog incorporates ALL changes across the `beta.N` versions of this upgrade.
+
+This version is marked by a major version bump because of the significant upgrades to underlying dependencies. While there should be no noticeable API changes from a downstream perspective, there may be breaking changes in the way that this library is bundled.
+
+The browser bundle size has decreased **significantly**:
+
+  * `stellar-base.min.js` is **340 KiB**, down from **1.2 MiB** previously.
+  * the new, unminified `stellar-base.js` is **895 KiB**.
+
+
+### Breaking Changes
+
+- The build system has been completely overhauled to support Webpack 5 ([#584](https://github.com/stellar/js-stellar-base/pull/584), [#585](https://github.com/stellar/js-stellar-base/pull/585)).
+
+Though we have tried to maintain compatibility with older JavaScript implementations, this still means you may need to update your build pipeline to transpile to certain targets.
+
+### Fixes
+
+- Fixes a bug when sorting mixed-case assets for liquidity pools ([#606](https://github.com/stellar/js-stellar-base/pull/606)).
+- Documentation is fixed and should generate correctly on https://stellar.github.io/js-stellar-base/ ([#609](https://github.com/stellar/js-stellar-base/pull/609)).
+
+### Updates
+
+- XDR has been updated to its latest version (both `curr` and `next` versions, [#587](https://github.com/stellar/js-stellar-base/pull/587)).
+- Drop the `lodash` dependency entirely ([#624](https://github.com/stellar/js-stellar-base/issues/624)).
+- Drop the `crc` dependency and inline it to lower bundle size ([#621](https://github.com/stellar/js-stellar-base/pull/621)).
+- Upgrade all dependencies to their latest versions ([#608](https://github.com/stellar/js-stellar-base/pull/608)).
+
+
+## [v9.0.0-beta.3](https://github.com/stellar/js-stellar-base/compare/v9.0.0-beta.1..v9.0.0-beta.2)
+
+### Fix
+
+- Fixes a bug when sorting mixed-case assets for liquidity pools ([#606](https://github.com/stellar/js-stellar-base/pull/606)).
+
+### Update
+- Upgrade all dependencies to their latest versions ([#608](https://github.com/stellar/js-stellar-base/pull/608)).
+- Drop the `crc` dependency and inline it to lower bundle size ([#621](https://github.com/stellar/js-stellar-base/pull/621)).
+
+
+## [v9.0.0-beta.2](https://github.com/stellar/js-stellar-base/compare/v9.0.0-beta.1..v9.0.0-beta.2)
+
+### Update
+
+- Upgrades the `js-xdr` dependency (major performance improvements, see [`js-xdr@v2.0.0`](https://github.com/stellar/js-xdr/releases/tag/v2.0.0)) and other dependencies to their latest versions ([#592](https://github.com/stellar/js-stellar-base/pull/592)).
+
+
+## [v9.0.0-beta.1](https://github.com/stellar/js-stellar-base/compare/v9.0.0-beta.0..v9.0.0-beta.1)
+
+### Fix
+
+- Correct XDR type definition for raw `xdr.Operation`s ([#591](https://github.com/stellar/js-stellar-base/pull/591)).
+
+
+## [v9.0.0-beta.0](https://github.com/stellar/js-stellar-base/compare/v8.2.2..v9.0.0-beta.0)
+
+This version is marked by a major version bump because of the significant upgrades to underlying dependencies. While there should be no noticeable API changes from a downstream perspective, there may be breaking changes in the way that this library is bundled.
+
+### Fix
+
+- Build system has been overhauled to support Webpack 5 ([#585](https://github.com/stellar/js-stellar-base/pull/585)).
+
+- Current and vNext XDR updated to latest versions ([#587](https://github.com/stellar/js-stellar-base/pull/587)).
+
+
+## [v8.2.2](https://github.com/stellar/js-stellar-base/compare/v8.2.1..v8.2.2)
+
+### Fix
+
+- Enable signing in service workers using FastSigning ([#567](https://github.com/stellar/js-stellar-base/pull/567)).
+
+## [v8.2.1](https://github.com/stellar/js-stellar-base/compare/v8.2.0..v8.2.1)
+
+### Fix
+
+* Turn all XLM-like (i.e. casing agnostic) asset codes into the native asset with code `XLM` ([#546](https://github.com/stellar/js-stellar-base/pull/546)).
+
+
+## [v8.2.0](https://github.com/stellar/js-stellar-base/compare/v8.1.0..v8.2.0)
+
+### Add
+
+* `Operation.setOptions` now supports the new [CAP-40](https://stellar.org/protocol/cap-40) signed payload signer (`ed25519SignedPayload`) thanks to @orbitlens ([#542](https://github.com/stellar/js-stellar-base/pull/542)).
+
+
+## [v8.1.0](https://github.com/stellar/js-stellar-base/compare/v8.0.1..v8.1.0)
+
+### Add
+
+* `TransactionBase.addDecoratedSignature` is a clearer way to add signatures directly to a built transaction without fiddling with the underlying `signatures` array ([#535](https://github.com/stellar/js-stellar-base/pull/535)).
+
+* Update the XDR definitions (and the way in which they're generated) to contain both the latest current XDR (which introduces [CAP-42](https://stellar.org/protocol/cap-42)) and the "v-next" XDR (which contains XDR related to Soroban and should be considered unstable) ([#537](https://github.com/stellar/js-stellar-base/pull/537)).
+
+### Fix
+
+* Correctly set `minAccountSequence` in `TransactionBuilder` for large values ([#539](https://github.com/stellar/js-stellar-base/pull/539), thank you @overcat!).
+
+
+## [v8.0.1](https://github.com/stellar/js-stellar-base/compare/v8.0.0..v8.0.1)
+
+### Fix
+
+- Correctly predict claimable balance IDs with large sequence numbers ([#530](https://github.com/stellar/js-stellar-base/pull/530), thank you @overcat!).
+
+
+## [v8.0.0](https://github.com/stellar/js-stellar-base/compare/v7.0.0..v8.0.0)
+
+This is a promotion from the beta version without changes, now that the CAP-21 and CAP-40 implementations have made it into [stellar/stellar-core#master](https://github.com/stellar/stellar-core/tree/master/).
+
+
+## [v8.0.0-beta.0](https://github.com/stellar/js-stellar-base/compare/v7.0.0..v8.0.0-beta.0)
+
+**This release adds support for Protocol 19**, which includes [CAP-21](https://stellar.org/protocol/cap-21) (new transaction preconditions) and [CAP-40](https://stellar.org/protocol/cap-40) (signed payload signers).
+
+This is considered a beta release until the XDR for the Stellar protocol stabilizes and is officially released.
+
+### Breaking
+
+As of this release, the minimum supported version of NodeJS is **14.x**.
+
+- Two XDR types have been renamed:
+  * `xdr.OperationId` is now `xdr.HashIdPreimage`
+  * `xdr.OperationIdId` is now `xdr.HashIdPreimageOperationId`
+
+### Add
+
+- Support for converting signed payloads ([CAP-40](https://stellar.org/protocol/cap-40)) to and from their StrKey (`P...`) representation ([#511](https://github.com/stellar/js-stellar-base/pull/511)):
+  * `Keypair.signPayloadDecorated(data)`
+  * `StrKey.encodeSignedPayload(buf)`
+  * `StrKey.decodeSignedPayload(str)`
+  * `StrKey.isValidSignedPayload(str)`
+
+- Support for creating transactions with the new preconditions ([CAP-21](https://stellar.org/protocol/cap-21)) via `TransactionBuilder` ([#513](https://github.com/stellar/js-stellar-base/pull/513)).
+
+- A way to convert between addresses (like `G...` and `P...`, i.e. the `StrKey` class) and their respective signer keys (i.e. `xdr.SignerKey`s), particularly for use in the new transaction preconditions ([#520](https://github.com/stellar/js-stellar-base/pull/520)):
+  * `SignerKey.decodeAddress(address)`
+  * `SignerKey.encodeSignerKey(address)`
+  * `TransactionBuilder.setTimebounds(min, max)`
+  * `TransactionBuilder.setLedgerbounds(min, max)`
+  * `TransactionBuilder.setMinAccountSequence(seq)`
+  * `TransactionBuilder.setMinAccountSequenceAge(age)`
+  * `TransactionBuilder.setMinAccountSequenceLedgerGap(gap)`
+  * `TransactionBuilder.setExtraSigners([signers])`
+
+### Fix
+
+- Correct a TypeScript definition on the `RevokeLiquidityPoolSponsorship` operation ([#522](https://github.com/stellar/js-stellar-base/pull/522)).
+
+- Resolves a bug that incorrectly sorted `Asset`s with mixed-case asset codes (it preferred lowercase codes incorrectly) ([#516](https://github.com/stellar/js-stellar-base/pull/516)).
+
+- Update developer dependencies:
+  * `isparta`, `jsdoc`, and `underscore` ([#500](https://github.com/stellar/js-stellar-base/pull/500))
+  * `ajv` ([#503](https://github.com/stellar/js-stellar-base/pull/503))
+  * `karma` ([#505](https://github.com/stellar/js-stellar-base/pull/505))
+  * `minimist` ([#514](https://github.com/stellar/js-stellar-base/pull/514))
+
+
 ## [v7.0.0](https://github.com/stellar/js-stellar-base/compare/v6.0.6..v7.0.0)
 
 This release introduces **unconditional support for muxed accounts** ([#485](https://github.com/stellar/js-stellar-base/pull/485)).
@@ -140,7 +299,7 @@ Please refer to the [security advisory](https://github.com/advisories/GHSA-pjwm-
 ## [v5.3.1](https://github.com/stellar/js-stellar-base/compare/v5.3.0..v5.3.1)
 
 ### Fix
-- Creating operations with both muxed and unmuxed properties resulted in unintuitive XDR. Specifically, the unmuxed property would be transformed into the equivalent property with an ID of 0 ([#441](https://github.com/stellar/js-stellar-base/pull/441)). 
+- Creating operations with both muxed and unmuxed properties resulted in unintuitive XDR. Specifically, the unmuxed property would be transformed into the equivalent property with an ID of 0 ([#441](https://github.com/stellar/js-stellar-base/pull/441)).
 
 
 ## [v5.3.0](https://github.com/stellar/js-stellar-base/compare/v5.2.1..v5.3.0)
@@ -177,13 +336,13 @@ Please refer to the [security advisory](https://github.com/advisories/GHSA-pjwm-
   // MA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAD5DTGC 1000
 
   const mux2 = ACC.createSubaccount('2000');
-  console.log("Parent relationship preserved:", 
+  console.log("Parent relationship preserved:",
               mux2.baseAccount().accountId() === mux1.baseAccount().accountId());
   console.log(mux2.accountId(), mux2.id());
   // MA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAAH2B4RU 2000
 
   mux1.setID('3000');
-  console.log("Underlying account unchanged:", 
+  console.log("Underlying account unchanged:",
               ACC.accountId() === mux1.baseAccount().accountId());
   console.log(mux1.accountId(), mux1.id());
   // MA7QYNF7SOWQ3GLR2BGMZEHXAVIRZA4KVWLTJJFC7MGXUA74P7UJUAAAAAAAAAALXC5LE 3000
@@ -202,7 +361,7 @@ Please refer to the [security advisory](https://github.com/advisories/GHSA-pjwm-
 
 ### Update
 
-- The Typescript definitions have been updated to support CAP-35 ([#407](https://github.com/stellar/js-stellar-base/pull/407)). 
+- The Typescript definitions have been updated to support CAP-35 ([#407](https://github.com/stellar/js-stellar-base/pull/407)).
 
 ## [v5.0.0](https://github.com/stellar/js-stellar-base/compare/v4.0.3..v5.0.0)
 

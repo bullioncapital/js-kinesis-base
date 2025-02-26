@@ -1,6 +1,6 @@
 import { Hyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
-import xdr from '../generated/stellar-xdr_generated';
+import xdr from '../xdr';
 
 /**
  * This operation bumps sequence number.

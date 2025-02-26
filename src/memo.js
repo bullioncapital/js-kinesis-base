@@ -1,6 +1,6 @@
 import { UnsignedHyper } from '@stellar/js-xdr';
 import BigNumber from 'bignumber.js';
-import xdr from './generated/stellar-xdr_generated';
+import xdr from './xdr';
 
 /**
  * Type of {@link Memo}.
@@ -131,7 +131,7 @@ export class Memo {
       `Expects a 32 byte hash value or hex encoded string. Got ${value}`
     );
 
-    if (value === null || value === undefined) {
+    if (value === null || typeof value === 'undefined') {
       throw error;
     }
 

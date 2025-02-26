@@ -244,9 +244,8 @@ describe('TransactionBuilder', function () {
         .build();
     });
 
-    // let client control the fee
-    xit('should have 2000 stroops fee', function (done) {
-      expect(transaction.fee).to.be.equal('2000');
+    it('should have 1000 stroops fee', function (done) {
+      expect(transaction.fee).to.be.equal('1000');
       done();
     });
   });
@@ -672,7 +671,7 @@ describe('TransactionBuilder', function () {
         sourceAccountEd25519: sourceAccountEd25519,
         fee: v1Tx.fee(),
         seqNum: v1Tx.seqNum(),
-        timeBounds: v1Tx.timeBounds(),
+        timeBounds: v1Tx.cond().timeBounds(),
         memo: v1Tx.memo(),
         operations: v1Tx.operations(),
         ext: new StellarBase.xdr.TransactionV0Ext(0)
