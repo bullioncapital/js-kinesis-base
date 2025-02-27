@@ -979,6 +979,7 @@ export namespace TransactionBuilder {
     fee: string;
     memo?: Memo;
     networkPassphrase?: string;
+    v1?: boolean;
     // preconditions:
     timebounds?: {
       minTime?: Date | number | string;
